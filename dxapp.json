@@ -81,7 +81,7 @@
         }
       },
       "interpreter": "python3",
-      "file": "src/eggd_generate_fusion_workbook.py",
+      "file": "resources/home/dnanexus/generate_fusion_workbook.py",
       "distribution": "Ubuntu",
       "release": "24.04",
       "version": "0"
