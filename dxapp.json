@@ -1,0 +1,103 @@
+{
+    "name": "eggd_generate_fusion_workbook",
+    "title": "eggd_generate_fusion_workbook",
+    "summary": "App for fusion workbook",
+    "dxapi": "1.0.0",
+    "version": "1.0.0",
+    "inputSpec": [
+      {
+        "name": "starfusion_predictions",
+        "label": "starfusion_predictions",
+        "class": "array:file",
+        "optional": false,
+        "patterns": [
+          "*"
+        ],
+        "help": ""
+      },
+      {
+        "name": "fusioninspector_predictions",
+        "label": "fusioninspector_predictions",
+        "class": "array:file",
+        "optional": false,
+        "patterns": [
+          "*"
+        ],
+        "help": ""
+      },
+      {
+        "name": "fastqc_output",
+        "label": "fastqc_output",
+        "class": "file",
+        "optional": false,
+        "patterns": [
+          "*"
+        ],
+        "help": ""
+      },
+      {
+        "name": "PC1_PC20_predicted_S",
+        "class": "file",
+        "optional": false,
+        "patterns": [
+          "*"
+        ],
+        "help": ""
+      },
+      {
+        "name": "PC1_PC20_merged_S",
+        "class": "file",
+        "optional": false,
+        "patterns": [
+          "*"
+        ],
+        "help": ""
+      },
+      {
+        "name": "epic",
+        "class": "file",
+        "optional": true,
+        "patterns": [
+          "*"
+        ],
+        "help": ""
+      }
+    ],
+    "outputSpec": [
+      {
+        "name": "fusion_workbook",
+        "label": "fusion_workbook",
+        "class": "file",
+        "patterns": [
+          "*"
+        ],
+        "help": ""
+      }
+    ],
+    "runSpec": {
+      "timeoutPolicy": {
+        "*": {
+          "hours": 2
+        }
+      },
+      "interpreter": "python3",
+      "file": "src/eggd_generate_fusion_workbook.py",
+      "distribution": "Ubuntu",
+      "release": "24.04",
+      "version": "0"
+    },
+    
+    "access": {
+      "project": "CONTRIBUTE"
+    },
+    "regionalOptions": {
+      "aws:eu-central-1": {
+        "systemRequirements": {
+          "*": {
+            "instanceType": "mem1_ssd1_v2_x4"
+          }
+        }
+      }
+    }
+  }
+  

@@ -1,2 +1,3 @@
-# DNAnexus_app_template
-This could be used as a starting point when developing new apps for DNAnexus
+# eggd_generate_fusion_workbook (DNAnexus Platform App)
+
+App for fusion workbook
