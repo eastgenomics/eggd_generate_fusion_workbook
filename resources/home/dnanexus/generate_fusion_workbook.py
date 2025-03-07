@@ -35,14 +35,17 @@ def main(
 
     # Initialize inputs into dxpy.DXDataObject instances
 
-    starfusion_predictions = [dxpy.DXFile(item) for item in starfusion_predictions]
-    fusioninspector_predictions = [dxpy.DXFile(item) for item in fusioninspector_predictions]
+    starfusion_predictions = [
+        dxpy.DXFile(item) for item in starfusion_predictions
+    ]
+    fusioninspector_predictions = [
+        dxpy.DXFile(item) for item in fusioninspector_predictions
+    ]
     fastqc_output = dxpy.DXFile(fastqc_output)
     PC1_PC20_predicted_S = dxpy.DXFile(PC1_PC20_predicted_S)
     PC1_PC20_merged_S = dxpy.DXFile(PC1_PC20_merged_S)
     if epic is not None:
         epic = dxpy.DXFile(epic)
-
 
     
     df_star_fusion = parse_star_fusion(starfusion_predictions)
@@ -59,11 +62,12 @@ def main(
             extra_cols=STAR_FUSION_EXTRA_COLS
         )
         
-        # to do
+        ### to do
         # add other sheets
         # add pivots
         # improve dxapp.json
         # add docstrings
+        # change outputfile to project name
 
     fusion_workbook = dxpy.upload_local_file(outfile)
 
