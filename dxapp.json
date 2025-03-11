@@ -6,61 +6,37 @@
     "version": "1.0.0",
     "inputSpec": [
       {
-        "name": "starfusion_predictions",
-        "label": "starfusion_predictions",
+        "name": "starfusion_files",
+        "label": "starfusion_files",
         "class": "array:file",
         "optional": false,
-        "patterns": [
-          "*"
-        ],
-        "help": ""
+        "help": "STAR-Fusion output files containing fusion gene candidates and their supporting evidence"
       },
       {
-        "name": "fusioninspector_predictions",
-        "label": "fusioninspector_predictions",
+        "name": "fusioninspector_files",
+        "label": "fusioninspector_files",
         "class": "array:file",
         "optional": false,
-        "patterns": [
-          "*"
-        ],
-        "help": ""
+        "help": "FusionInspector output files for validation of fusions"
       },
       {
-        "name": "fastqc_output",
-        "label": "fastqc_output",
+        "name": "fastqc_data",
+        "label": "fastqc_data",
         "class": "file",
         "optional": false,
-        "patterns": [
-          "*"
-        ],
-        "help": ""
+        "help": "FastQC output file containing quality metrics for the sequencing data"
       },
       {
-        "name": "PC1_PC20_predicted_S",
+        "name": "SF_previous_runs_data",
         "class": "file",
         "optional": false,
-        "patterns": [
-          "*"
-        ],
-        "help": ""
+        "help": "File containing info of STAR-Fusion's predictons from previous runs"
       },
       {
-        "name": "PC1_PC20_merged_S",
+        "name": "FI_previous_runs_data",
         "class": "file",
         "optional": false,
-        "patterns": [
-          "*"
-        ],
-        "help": ""
-      },
-      {
-        "name": "epic",
-        "class": "file",
-        "optional": true,
-        "patterns": [
-          "*"
-        ],
-        "help": ""
+        "help": "File containing info of FusionInspector's predictons from previous runs"
       }
     ],
     "outputSpec": [
@@ -69,9 +45,9 @@
         "label": "fusion_workbook",
         "class": "file",
         "patterns": [
-          "*"
+          "*.xlsx"
         ],
-        "help": ""
+        "help": "Workbook containing fusion genes and associated QC and metadata"
       }
     ],
     "runSpec": {
@@ -86,7 +62,6 @@
       "release": "24.04",
       "version": "0"
     },
-    
     "access": {
       "project": "CONTRIBUTE"
     },
@@ -98,6 +73,8 @@
           }
         }
       }
-    }
+    },
+    "developers": ["org-emee_1"],
+    "authorizedUsers": ["org-emee_1"]
   }
   

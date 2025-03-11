@@ -9,25 +9,24 @@ import dxpy
 
 from typing import List
 
-
 pip.main(["install", "--no-index", "--no-deps", *glob("packages/*")])
 
 import pandas as pd
 import openpyxl 
 
-from utils.utils import write_df_to_sheet
+from utils.utils import write_df_to_sheet, get_project_info
 from utils.fastqc import parse_fastqc
 from utils.fusion_inspector import parse_fusion_inspector, FUSION_INSPECTOR_EXTRA_COLS
 from utils.star_fusion import parse_star_fusion, STAR_FUSION_EXTRA_COLS
 
+
 @dxpy.entry_point('main')
 def main(
-    starfusion_predictions,
-    fusioninspector_predictions,
-    fastqc_output,
-    PC1_PC20_predicted_S,
-    PC1_PC20_merged_S,
-    epic=None
+    starfusion_files: List,
+    fusioninspector_files: List,
+    fastqc_data: str,
+    SF_previous_runs_data: str,
+    FI_previous_runs_data: str,
 ):
     """
     main
@@ -35,28 +34,25 @@ def main(
 
     # Initialize inputs into dxpy.DXDataObject instances
 
-    starfusion_predictions = [
-        dxpy.DXFile(item) for item in starfusion_predictions
+    starfusion_files = [
+        dxpy.DXFile(item) for item in starfusion_files
     ]
-    fusioninspector_predictions = [
-        dxpy.DXFile(item) for item in fusioninspector_predictions
+    fusioninspector_files = [
+        dxpy.DXFile(item) for item in fusioninspector_files
     ]
-    fastqc_output = dxpy.DXFile(fastqc_output)
-    PC1_PC20_predicted_S = dxpy.DXFile(PC1_PC20_predicted_S)
-    PC1_PC20_merged_S = dxpy.DXFile(PC1_PC20_merged_S)
-    if epic is not None:
-        epic = dxpy.DXFile(epic)
+    fastqc_data = dxpy.DXFile(fastqc_data)
+    SF_previous_data = dxpy.DXFile(SF_previous_runs_data)
+    FI_previous_data = dxpy.DXFile(FI_previous_runs_data)
 
+    df_starfusion = parse_star_fusion(starfusion_files)
     
-    df_star_fusion = parse_star_fusion(starfusion_predictions)
-    
-    outfile = "output.xlsx"
-    
+    project_name, _ = get_project_info()
+    outfile = f"{project_name}_fusion_workbook.xlsx"
 
     with pd.ExcelWriter(outfile, engine="openpyxl") as writer:
         write_df_to_sheet(
             writer, 
-            df_star_fusion, 
+            df_starfusion,
             sheet_name="STAR",
             tab_color="FF0000",
             extra_cols=STAR_FUSION_EXTRA_COLS

@@ -88,3 +88,20 @@ def write_df_to_sheet(
         worksheet.column_dimensions[column_letter].width = max(
             max_length + 2, 10
         )
+
+
+def get_project_info() -> tuple[str, str]:
+    """
+    Get the project name for naming output file
+
+    Returns:
+        project_name (str): name of DNAnexus project
+        project_id (str): ID of DNAnexus project
+    """
+    project_id = os.environ.get("DX_PROJECT_CONTEXT_ID")
+
+    # Get name of project for output naming
+    project_name = dxpy.describe(project_id)["name"]
+    project_name = "_".join(project_name.split("_")[1:])
+
+    return project_name, project_id
