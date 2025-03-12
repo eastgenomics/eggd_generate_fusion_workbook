@@ -1,6 +1,7 @@
 """Module for parsing fusion data from their respective DNAnexus files into a
 pandas data frame
 """
+
 from concurrent.futures import ThreadPoolExecutor
 import dxpy
 import pandas as pd
@@ -11,7 +12,8 @@ from .utils import read_dxfile
 
 
 def parse_fastqc(dxfile: DXDataObject) -> pd.DataFrame:
-    """Parse the content of fastqc multiqc output and compute required metrics from deduplicated_percentage
+    """Parse the content of fastqc multiqc output and compute required 
+    metrics from deduplicated_percentage
 
     Parameters
     ----------
@@ -41,26 +43,28 @@ def parse_fastqc(dxfile: DXDataObject) -> pd.DataFrame:
 
     df["Unique Reads"] = (
         (df["total_deduplicated_percentage"] / 100.0) * df["Total Sequences"]
-    ).astype(int)
+        ).astype(int)
     df["Duplicate Reads"] = (
         df["Total Sequences"] - df["Unique Reads"]
-    ).astype(int)
+        ).astype(int)
     df["Unique Reads(M)"] = df["Unique Reads"] / 1000000
     df["Duplicate Reads(M)"] = df["Duplicate Reads"] / 1000000
-    df = df[[
-        "Sample",
-        "Unique Reads",
-        "Duplicate Reads",
-        "Unique Reads(M)",
-        "Duplicate Reads(M)"
-    ]]
+    df = df[
+        [
+            "Sample",
+            "Unique Reads",
+            "Duplicate Reads",
+            "Unique Reads(M)",
+            "Duplicate Reads(M)",
+        ]
+    ]
 
     return df
 
 
 def _parse_fusion_files(dxfiles: List[DXDataObject]) -> pd.DataFrame:
     """
-    Reads and concatenates a list of DNAnexus fusion-related files 
+    Reads and concatenates a list of DNAnexus fusion-related files
     into a single DataFrame.
 
     Parameters
@@ -71,12 +75,12 @@ def _parse_fusion_files(dxfiles: List[DXDataObject]) -> pd.DataFrame:
     Returns
     -------
     pd.DataFrame
-        A concatenated DataFrame containing the combined data 
+        A concatenated DataFrame containing the combined data
         from all input files.
     """
     if not dxfiles:
         return pd.DataFrame()
-    
+
     max_workers = min(16, len(dxfiles))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         df = pd.concat(executor.map(read_dxfile, dxfiles))
@@ -96,7 +100,7 @@ def parse_fusion_inspector(dxfiles: List[DXDataObject]) -> pd.DataFrame:
     Returns
     -------
     pd.DataFrame
-        A concatenated DataFrame containing the combined data 
+        A concatenated DataFrame containing the combined data
         from all input files.
     """
     # simply calls _parse_fusion_files for now
@@ -116,7 +120,7 @@ def parse_star_fusion(dxfiles: List[DXDataObject]) -> pd.DataFrame:
     Returns
     -------
     pd.DataFrame
-        A concatenated DataFrame containing the combined data 
+        A concatenated DataFrame containing the combined data
         from all input files.
     """
     # same as above; to allow further customisation per tool as needed.

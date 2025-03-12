@@ -9,10 +9,8 @@ from dxpy import DXDataObject
 
 
 def read_dxfile(
-    dxfile: DXDataObject,
-    sep :str = "\t",
-    include_fname :bool = True
-    ) -> pd.DataFrame:
+    dxfile: DXDataObject, sep: str = "\t", include_fname: bool = True
+) -> pd.DataFrame:
     """reads a DNAnexus file object into a pandas dataframe
 
     Parameters
@@ -40,9 +38,8 @@ def read_dxfile(
 
 
 def _add_extra_columns(
-    worksheet: openpyxl.Worksheet,
-    extra_cols: dict[str, str]
-    ) -> None:
+    worksheet: openpyxl.Worksheet, extra_cols: dict[str, str]
+) -> None:
     """
     Inserts additional columns with formulas at the beginning of a sheet
 
@@ -52,7 +49,7 @@ def _add_extra_columns(
         The worksheet where columns will be added.
     extra_cols : dict[str, str]
         A mapping of column names to Excel formulas
-    
+
     Returns
     -------
     None
@@ -64,9 +61,7 @@ def _add_extra_columns(
     for i, (col, formula) in enumerate(extra_cols.items(), start=1):
         worksheet.cell(row=1, column=i, value=col)
         for row in range(2, worksheet.max_row + 1):
-            worksheet.cell(
-                row=row, column=i, value=formula.replace("{row}", str(row))
-            )
+            worksheet.cell(row=row, column=i, value=formula.replace("{row}", str(row)))
 
 
 def _apply_header_format(worksheet) -> None:
@@ -109,12 +104,12 @@ def _adjust_column_widths(worksheet):
 
 
 def write_df_to_sheet(
-    writer: pd.ExcelWriter, 
-    df: pd.DataFrame, 
-    sheet_name: str, 
+    writer: pd.ExcelWriter,
+    df: pd.DataFrame,
+    sheet_name: str,
     tab_color: str = "000000",
-    extra_cols: dict[str, str] = None
-    ) -> None:
+    extra_cols: dict[str, str] = None,
+) -> None:
     """Writes a Pandas DataFrame to an Excel sheet with formatting.
 
     Parameters
@@ -137,7 +132,7 @@ def write_df_to_sheet(
     df.to_excel(writer, sheet_name=sheet_name, index=False)
     worksheet = writer.sheets[sheet_name]
     worksheet.sheet_properties.tabColor = tab_color
-    
+
     # Add extra columns if provided
     if extra_cols:
         _add_extra_columns(worksheet, extra_cols)
@@ -154,7 +149,7 @@ def get_project_info() -> tuple[str, str]:
     tuple[str, str]
         Name and ID of DNAnexus project
     """
-    
+
     project_id = os.environ.get("DX_PROJECT_CONTEXT_ID")
 
     # Get name of project for output naming

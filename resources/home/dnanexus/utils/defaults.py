@@ -3,13 +3,12 @@ Module containing default constants for sheet configurations
 Formulas adapted from demo WB provided by scientist
 """
 
-
 FASTQC_SHEET_CONFIG = {
     "sheet_name": "FastQC",
     "tab_color": "008000",  # Green
     "extra_cols": {
         "Specimen": "=MID(C{row},11,10)",
-        "EPIC": "=VLOOKUP(A{row},EPIC!AJ:AK,2,0)"
+        "EPIC": "=VLOOKUP(A{row},EPIC!AJ:AK,2,0)",
     },
 }
 
@@ -26,7 +25,7 @@ SF_SHEET_CONFIG = {
         "Duplicate Reads (M) PC3B": "=VLOOKUP(A{row},MultiQC_Pivot!A:D,4,0)",
         "ID": '=CONCAT(A{row},"_",L{row})',
         "LEFTRIGHT": '=CONCATENATE(S{row},"_",U{row})',
-        "FRAME": "=VLOOKUP(I{row},PC4_MERGED!C:AM,32,0)"
+        "FRAME": "=VLOOKUP(I{row},PC4_MERGED!C:AM,32,0)",
     },
 }
 
@@ -36,7 +35,7 @@ FUSION_INSPECTOR_SHEET_CONFIG = {
     "extra_cols": {
         "SPECIMEN": "=MID(D{row},11,10)",
         "ID": '=CONCAT(A{row},"_",E{row})',
-        "LEFTRIGHT": '=CONCAT(L{row},"_",O{row})'
+        "LEFTRIGHT": '=CONCAT(L{row},"_",O{row})',
     },
 }
 
