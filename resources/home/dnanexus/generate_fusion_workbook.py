@@ -75,10 +75,18 @@ def main(
         write_df_to_sheet(writer, pd.DataFrame(), **EPIC_SHEET_CONFIG)
 
         # Add SF previous runs data
-        write_df_to_sheet(writer, df_sf_previous, **SF_PREVIOUS_RUNS_SHEET_CONFIG)
+        write_df_to_sheet(
+            writer,
+            df_sf_previous, 
+            **SF_PREVIOUS_RUNS_SHEET_CONFIG
+        )
 
         # Add FI previous runs data
-        write_df_to_sheet(writer, df_fi_previous, **FI_PREVIOUS_RUNS_SHEET_CONFIG)
+        write_df_to_sheet(
+            writer,
+            df_fi_previous,
+            **FI_PREVIOUS_RUNS_SHEET_CONFIG
+        )
 
         # Add FastQC data
         write_df_to_sheet(writer, df_fastqc, **FASTQC_SHEET_CONFIG)
@@ -87,7 +95,11 @@ def main(
         write_df_to_sheet(writer, df_starfusion, **STAR_FUSION_SHEET_CONFIG)
 
         # Add Fusion Inspector data
-        write_df_to_sheet(writer, df_fusioninspector, **FUSION_INSPECTOR_SHEET_CONFIG)
+        write_df_to_sheet(
+            writer,
+            df_fusioninspector,
+            **FUSION_INSPECTOR_SHEET_CONFIG
+        )
         
         ### to do
         # add pivots
