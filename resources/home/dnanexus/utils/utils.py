@@ -3,35 +3,109 @@
 
 import pandas as pd
 import openpyxl
-from openpyxl.styles import PatternFill, Font
+from openpyxl.styles import Font
 import dxpy
-from typing import List
+from dxpy import DXDataObject
 
 
 def read_dxfile(
-    dxfile: dxpy.DXDataObject,
+    dxfile: DXDataObject,
     sep :str = "\t",
     include_fname :bool = True
     ) -> pd.DataFrame:
     """reads a DNAnexus file object into a pandas dataframe
 
-    Args:
-        dxfile (dxpy.DXDataObject): An instance of DXDataObject; behaves like a
-            python file object.
-        sep (str): delimeter of data values in file. Defaults to "\t".
-        include_fname (bool): Specifies whether to set file name as first column.
+    Parameters
+    ----------
+    dxfile : DXDataObject
+        An instance of DXDataObject; behaves like a python file object.
+    sep : str
+        Delimeter of data values in files. Defaults to  "\t"
+    include_fname : bool
+        Specifies whether to set file name as first column. Defaults to True
 
-    Returns:
-        pd.DataFrame: An instance of DataFrame with file content
+    Returns
+    -------
+    pd.DataFrame
+        An instance of DataFrame with file content
     """
 
     df = pd.read_csv(dxfile, sep=sep)
-    
+
     if include_fname:
         fname = dxfile.name
         df.insert(0, "file_name", fname)
-    
+
     return df
+
+
+def _add_extra_columns(
+    worksheet: openpyxl.Worksheet,
+    extra_cols: dict[str, str]
+    ) -> None:
+    """
+    Inserts additional columns with formulas at the beginning of a sheet
+
+    Parameters
+    ----------
+    worksheet : openpyxl.Worksheet
+        The worksheet where columns will be added.
+    extra_cols : dict[str, str]
+        A mapping of column names to Excel formulas
+    
+    Returns
+    -------
+    None
+    """
+
+    num_cols = len(extra_cols)
+    worksheet.insert_cols(1, amount=num_cols)
+
+    for i, (col, formula) in enumerate(extra_cols.items(), start=1):
+        worksheet.cell(row=1, column=i, value=col)
+        for row in range(2, worksheet.max_row + 1):
+            worksheet.cell(
+                row=row, column=i, value=formula.replace("{row}", str(row))
+            )
+
+
+def _apply_header_format(worksheet) -> None:
+    """
+    Applies bold formatting to all headers in the sheet.
+
+    Parameters
+    ----------
+    worksheet : openpyxl.Worksheet
+        The worksheet where header formatting will be applied.
+
+    Returns
+    -------
+    None
+    """
+    header_font = Font(bold=True)
+    for col in range(1, worksheet.max_column + 1):
+        cell = worksheet.cell(row=1, column=col)
+        cell.font = header_font
+
+
+def _adjust_column_widths(worksheet):
+    """
+    Adjusts column widths for better visibility.
+
+    Parameters
+    ----------
+    worksheet : openpyxl.Worksheet
+        The worksheet where column widths will be adjusted.
+
+    Returns
+    -------
+    None
+    """
+    for cell in worksheet[1]:  # Iterate over header row
+        col_letter = cell.column_letter
+        worksheet.column_dimensions[col_letter].width = max(
+            len(str(cell.value)) + 2, 10
+        )
 
 
 def write_df_to_sheet(
@@ -40,64 +114,47 @@ def write_df_to_sheet(
     sheet_name: str, 
     tab_color: str = "000000",
     extra_cols: dict[str, str] = None
-) -> None:
-    """
-    Writes a Pandas DataFrame to an Excel sheet with formatting.
+    ) -> None:
+    """Writes a Pandas DataFrame to an Excel sheet with formatting.
 
-    Args:
-        writer (pd.ExcelWriter): The Excel writer object to write the sheet into.
-        df (pd.DataFrame): The DataFrame containing the data.
-        sheet_name (str): Name of the Excel sheet.
-        tab_color (str): Hex colour code for the sheet tab. Defaults to black ("000000").
-        extra_cols (dict): Dictionary of new columns with formulas. Example: 
+    Parameters
+    ----------
+    writer : pd.ExcelWriter
+        The Excel writer object to write the sheet into
+    df : pd.DataFrame
+        The DataFrame containing the data.
+    sheet_name : str
+        Name of the Excel sheet
+    tab_color : str, optional
+        Hex colour code for the sheet tab. Defaults to black ("000000")
+    extra_cols : dict[str, str], optional
+        A mapping of new column names to excel formulas. Example:
             {
-                "Specimen": "=MID(C{row},11,10)", 
+                "Specimen": "=MID(C{row},11,10)",
                 "EPIC": "=VLOOKUP(A{row},EPIC!AJ:AK,2,0)"
             }
-
     """
     df.to_excel(writer, sheet_name=sheet_name, index=False)
     worksheet = writer.sheets[sheet_name]
     worksheet.sheet_properties.tabColor = tab_color
     
-    # Apply formatting to headers
-    header_font = Font(bold=True)
-    for idx, col in enumerate(df.columns, start=1):
-        cell = worksheet.cell(row=1, column=idx, value=col)
-        cell.font = header_font
-    
-    # Insert formula-based columns at the beginning if provided
+    # Add extra columns if provided
     if extra_cols:
-        num_cols = len(extra_cols)
-        worksheet.insert_cols(1, amount=num_cols)
+        _add_extra_columns(worksheet, extra_cols)
 
-        for i, (col, formula) in enumerate(extra_cols.items(), start=1):
-            worksheet.cell(row=1, column=i, value=col).font = header_font
-
-            for row in range(2, worksheet.max_row + 1):
-                worksheet.cell(
-                    row=row, column=i, value=formula.replace("{row}", str(row))
-                )
-
-    # Adjust column widths for visibility
-    for cells in worksheet.iter_cols():
-        max_length = max(
-            len(str(cell.value)) if cell.value else 0 for cell in cells
-        )
-        column_letter = cells[0].column_letter
-        worksheet.column_dimensions[column_letter].width = max(
-            max_length + 2, 10
-        )
+    _apply_header_format(worksheet)
+    _adjust_column_widths(worksheet)
 
 
 def get_project_info() -> tuple[str, str]:
-    """
-    Get the project name for naming output file
+    """Get the project name for naming output file
 
-    Returns:
-        project_name (str): name of DNAnexus project
-        project_id (str): ID of DNAnexus project
+    Returns
+    -------
+    tuple[str, str]
+        Name and ID of DNAnexus project
     """
+    
     project_id = os.environ.get("DX_PROJECT_CONTEXT_ID")
 
     # Get name of project for output naming
