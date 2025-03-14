@@ -53,6 +53,8 @@ def main(
         _description_
     """
     # Initialize inputs into dxpy.DXDataObject instances
+    print(type(starfusion_files))
+    print(type(fastqc_data))
     starfusion_files = [dxpy.DXFile(item) for item in starfusion_files]
     fusioninspector_files = [dxpy.DXFile(item) for item in fusioninspector_files]
     fastqc_data = dxpy.DXFile(fastqc_data)
@@ -84,10 +86,10 @@ def main(
         write_df_to_sheet(writer, df_fastqc, **FASTQC_SHEET_CONFIG)
 
         # Add STAR-Fusion data
-        write_df_to_sheet(writer, df_starfusion, **STAR_FUSION_SHEET_CONFIG)
+        write_df_to_sheet(writer, df_starfusion, **SF_SHEET_CONFIG)
 
         # Add Fusion Inspector data
-        write_df_to_sheet(writer, df_fusioninspector, **FUSION_INSPECTOR_SHEET_CONFIG)
+        write_df_to_sheet(writer, df_fusioninspector, **FI_SHEET_CONFIG)
 
         ### to do
         # add pivots

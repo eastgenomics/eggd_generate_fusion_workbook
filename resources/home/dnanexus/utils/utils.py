@@ -1,9 +1,11 @@
 """general and I/O utilities
 """
 
+import os
 import pandas as pd
 import openpyxl
 from openpyxl.styles import Font
+from openpyxl.worksheet.worksheet import Worksheet
 import dxpy
 from dxpy import DXDataObject
 
@@ -38,14 +40,14 @@ def read_dxfile(
 
 
 def _add_extra_columns(
-    worksheet: openpyxl.Worksheet, extra_cols: dict[str, str]
+    worksheet: Worksheet, extra_cols: dict[str, str]
 ) -> None:
     """
     Inserts additional columns with formulas at the beginning of a sheet
 
     Parameters
     ----------
-    worksheet : openpyxl.Worksheet
+    worksheet : Worksheet
         The worksheet where columns will be added.
     extra_cols : dict[str, str]
         A mapping of column names to Excel formulas
@@ -70,7 +72,7 @@ def _apply_header_format(worksheet) -> None:
 
     Parameters
     ----------
-    worksheet : openpyxl.Worksheet
+    worksheet : Worksheet
         The worksheet where header formatting will be applied.
 
     Returns
@@ -89,7 +91,7 @@ def _adjust_column_widths(worksheet):
 
     Parameters
     ----------
-    worksheet : openpyxl.Worksheet
+    worksheet : Worksheet
         The worksheet where column widths will be adjusted.
 
     Returns

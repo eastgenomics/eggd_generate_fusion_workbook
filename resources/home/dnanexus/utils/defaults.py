@@ -29,7 +29,7 @@ SF_SHEET_CONFIG = {
     },
 }
 
-FUSION_INSPECTOR_SHEET_CONFIG = {
+FI_SHEET_CONFIG = {
     "sheet_name": "Fusion Inspector",
     "tab_color": "800080",  # Purple
     "extra_cols": {
