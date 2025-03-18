@@ -8,7 +8,7 @@ import pandas as pd
 from dxpy import DXDataObject
 from typing import List
 
-from .utils import read_dxfile
+from .utils import read_dxfile, create_pivot_table
 
 
 def parse_fastqc(dxfile: DXDataObject) -> pd.DataFrame:
@@ -62,6 +62,31 @@ def parse_fastqc(dxfile: DXDataObject) -> pd.DataFrame:
     return df
 
 
+def make_fastqc_pivot(df:pd.DataFrame, pivot_config:dict) -> pd.DataFrame:
+    """generates FastQC pivot table 
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe containing raw fastqc data
+    pivot_config : dict
+        Mapping defining pivot structure
+
+    Returns
+    -------
+    pd.DataFrame
+        created pivot table with computed columns
+    """
+    df["SPECIMEN"] = df["Sample"].astype(str).str[10:20]
+    # omit EPIC col for now
+    
+    pivot_df = create_pivot_table(df, pivot_config)
+    pivot_df = pivot_df.reset_index(drop=False)
+    
+    return pivot_df
+    
+    
+    
 def _parse_fusion_files(dxfiles: List[DXDataObject]) -> pd.DataFrame:
     """
     Reads and concatenates a list of DNAnexus fusion-related files
@@ -125,3 +150,81 @@ def parse_star_fusion(dxfiles: List[DXDataObject]) -> pd.DataFrame:
     """
     # same as above; to allow further customisation per tool as needed.
     return _parse_fusion_files(dxfiles)
+
+
+def make_sf_pivot(
+    sf_df: pd.DataFrame,
+    sf_runs_df: pd.DataFrame,
+    fastqc_pivot_df: pd.DataFrame,
+    fi_df: pd.DataFrame,
+    pivot_config: dict
+) -> pd.DataFrame:
+    """Generates STAR-Fusion pivot table with merged data
+    
+    Parameters
+    ----------
+    sf_df : pd.DataFrame
+        Main STAR-Fusion data
+    sf_runs_df : pd.DataFrame
+        Historical STAR-Fusion data
+    fastqc_pivot_df : pd.DataFrame
+        FastQC summary data
+    fi_df : pd.DataFrame
+        Main Fusion Inspector data
+    pivot_config : dict
+        Pivot configuration parameters
+
+    Returns
+    -------
+    pd.DataFrame
+        Created Pivot table with merged data
+    """
+    
+    df = sf_df.copy()
+    
+    # =MID(K{row},11,10)
+    if 'file_name' in sf_df.columns:
+        df['SPECIMEN'] = df['file_name'].astype(str).str[10:20]
+    
+        # =LEFT(K{row},28)
+        df['FNAME'] = df['file_name'].astype(str).str[:28]
+        
+    # =CONCAT(A{row},"_",L{row})
+    df['ID'] = df['SPECIMEN'] + "_" + df['#FusionName']
+    
+    # =CONCATENATE(S{row},"_",U{row})
+    df['LEFTRIGHT'] = df['LeftBreakpoint'] + "_" + df['RightBreakpoint']
+
+    # Merge previous runs data (VLOOKUP equivalent)
+    if not sf_runs_df.empty:
+        df = df.merge(
+            sf_runs_df[['#FusionName', 'Count_Run_1_Run_20_predicted']],
+            on='#FusionName',
+            how='left'
+        )
+        df['Count_Run_1_Run_20_predicted'] = (
+            df['Count_Run_1_Run_20_predicted']
+            .fillna(0)
+            .astype(int)
+        )
+
+    # Merge FastQC metrics (VLOOKUP to FastQC_pivot)
+    if not fastqc_pivot_df.empty:
+        df = df.merge(
+            fastqc_pivot_df,
+            on='SPECIMEN',
+            how='left'
+        )
+
+    # Merge Fusion Inspector data
+    if not fi_df.empty:
+        df = df.merge(
+            fi_df[['LEFTRIGHT','PROT_FUSION_TYPE']],
+            on='LEFTRIGHT',
+            how='left'
+        ).rename(columns={'PROT_FUSION_TYPE': 'FRAME'})
+
+    # Create final pivot table
+    pivot_df = create_pivot_table(df, pivot_config)
+    
+    return pivot_df

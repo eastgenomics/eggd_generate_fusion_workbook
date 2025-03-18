@@ -5,6 +5,7 @@ import os
 import pandas as pd
 import openpyxl
 from openpyxl.styles import Font
+from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.worksheet.worksheet import Worksheet
 import dxpy
 from dxpy import DXDataObject
@@ -101,9 +102,21 @@ def _adjust_column_widths(worksheet):
     for cell in worksheet[1]:  # Iterate over header row
         col_letter = cell.column_letter
         worksheet.column_dimensions[col_letter].width = max(
-            len(str(cell.value)) + 2, 10
+            len(str(cell.value)) + 2, 12
         )
 
+def _set_tab_color(worksheet, hex_color: str) -> None:
+    """Sets worksheet tab colour
+
+    Parameters
+    ----------
+    worksheet : Worksheet
+        The worksheet to apply tab colour
+    hex_color : str
+        Hex colour code for the sheet tab
+    """
+    worksheet.sheet_properties.tabColor = hex_color
+    
 
 def write_df_to_sheet(
     writer: pd.ExcelWriter,
@@ -111,6 +124,7 @@ def write_df_to_sheet(
     sheet_name: str,
     tab_color: str = "000000",
     extra_cols: dict[str, str] = None,
+    include_index: bool = False
 ) -> None:
     """Writes a Pandas DataFrame to an Excel sheet with formatting.
 
@@ -130,10 +144,13 @@ def write_df_to_sheet(
                 "Specimen": "=MID(C{row},11,10)",
                 "EPIC": "=VLOOKUP(A{row},EPIC!AJ:AK,2,0)"
             }
+    include_index : bool, optional
+        Wether to write index of df to sheet. Defaults to False
     """
-    df.to_excel(writer, sheet_name=sheet_name, index=False)
+    df.to_excel(writer, sheet_name=sheet_name, index=include_index)
     worksheet = writer.sheets[sheet_name]
-    worksheet.sheet_properties.tabColor = tab_color
+    
+    _set_tab_color(worksheet, tab_color)
 
     # Add extra columns if provided
     if extra_cols:
@@ -142,6 +159,43 @@ def write_df_to_sheet(
     _apply_header_format(worksheet)
     _adjust_column_widths(worksheet)
 
+
+def create_pivot_table(
+    df: pd.DataFrame,
+    pivot_config: dict,
+) -> pd.DataFrame:
+    """Creates pivot table from a dataframe.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Source dataframe to create pivot from
+    pivot_config : dict
+        Dictionary defining pivot structure:
+            - index: Columns to group by (list for MultiIndex)
+            - columns: Columns for column grouping
+            - values: Value columns to aggregate
+            - aggfunc: Aggregation function
+            - add_total_row: Whether to add totals (default False)
+
+    Returns
+    ------
+    pd.DataFrame
+        created pivot table
+    """
+
+    # Create pivot table
+    pivot_df = df.pivot_table(
+        index=pivot_config["index"],
+        columns=pivot_config["columns"],
+        values=pivot_config["values"],
+        aggfunc=pivot_config["aggfunc"],
+        margins=pivot_config.get("add_total_row", False),
+        margins_name="Total"
+    )
+    
+    return pivot_df
+    
 
 def get_project_info() -> tuple[str, str]:
     """Get the project name for naming output file

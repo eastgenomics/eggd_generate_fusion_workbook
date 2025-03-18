@@ -3,13 +3,16 @@
 
 import os
 from glob import glob
+import subprocess
 from typing import List
 
+if os.path.exists("/home/dnanexus"):
+    # running in DNAnexus
+    subprocess.check_call(
+        ["pip", "install", "--no-index", "--no-deps"] + glob("packages/*")
+    )
+
 import dxpy
-import pip
-
-pip.main(["install", "--no-index", "--no-deps", *glob("packages/*")])
-
 import openpyxl
 import pandas as pd
 from utils.defaults import (
@@ -19,42 +22,51 @@ from utils.defaults import (
     FI_SHEET_CONFIG,
     SF_PREVIOUS_RUNS_SHEET_CONFIG,
     SF_SHEET_CONFIG,
+    FASTQC_PIVOT_CONFIG,
 )
-from utils.parser import parse_fastqc, parse_fusion_inspector, parse_star_fusion
-from utils.utils import get_project_info, read_dxfile, write_df_to_sheet
+from utils.parser import (
+    parse_fastqc,
+    parse_fusion_inspector,
+    parse_star_fusion,
+    make_fastqc_pivot
+)
+from utils.utils import (
+    get_project_info,
+    read_dxfile,
+    write_df_to_sheet,
+)
 
 
 @dxpy.entry_point("main")
 def main(
-    starfusion_files: List,
-    fusioninspector_files: List,
-    fastqc_data: str,
-    SF_previous_runs_data: str,
-    FI_previous_runs_data: str,
+    starfusion_files: List[dict],
+    fusioninspector_files: List[dict],
+    fastqc_data: dict,
+    SF_previous_runs_data: dict,
+    FI_previous_runs_data: dict,
 ):
-    """_summary_
+    """Generates a fusion workbook with data from
+    STAR-Fusion, FusionInspector, and FastQC
 
     Parameters
     ----------
-    starfusion_files : List
-        _description_
-    fusioninspector_files : List
-        _description_
-    fastqc_data : str
-        _description_
+    starfusion_files : List[dict]
+        List of dictionaries containing DXLinks to STAR-Fusion output files
+    fusioninspector_files : List[dict]
+        List of dictionaries containing DXLinks to FusionInspector output files
+    fastqc_data : dict
+        Mapping of DXLink to FastQC data file
     SF_previous_runs_data : str
-        _description_
+       Mapping of DXLink to STAR-Fusion previous runs data file
     FI_previous_runs_data : str
-        _description_
+        Mapping of DXLink to FusionInspector previous runs data file
 
     Returns
     -------
-    _type_
-        _description_
+    dict
+        Dictionary containing DXLink to the generated fusion workbook
     """
     # Initialize inputs into dxpy.DXDataObject instances
-    print(type(starfusion_files))
-    print(type(fastqc_data))
     starfusion_files = [dxpy.DXFile(item) for item in starfusion_files]
     fusioninspector_files = [dxpy.DXFile(item) for item in fusioninspector_files]
     fastqc_data = dxpy.DXFile(fastqc_data)
@@ -84,15 +96,20 @@ def main(
 
         # Add FastQC data
         write_df_to_sheet(writer, df_fastqc, **FASTQC_SHEET_CONFIG)
+        fastqc_pivot = make_fastqc_pivot(df_fastqc, FASTQC_PIVOT_CONFIG)
+        write_df_to_sheet(
+            writer,
+            fastqc_pivot,
+            sheet_name=FASTQC_PIVOT_CONFIG["sheet_name"],
+            tab_color=FASTQC_PIVOT_CONFIG["tab_color"],
+            include_index=True
+        )
 
         # Add STAR-Fusion data
         write_df_to_sheet(writer, df_starfusion, **SF_SHEET_CONFIG)
 
         # Add Fusion Inspector data
         write_df_to_sheet(writer, df_fusioninspector, **FI_SHEET_CONFIG)
-
-        ### to do
-        # add pivots
 
     fusion_workbook = dxpy.upload_local_file(outfile)
 
