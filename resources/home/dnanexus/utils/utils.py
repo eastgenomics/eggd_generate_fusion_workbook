@@ -4,9 +4,10 @@
 import os
 import pandas as pd
 import openpyxl
-from openpyxl.styles import Font
+from openpyxl.styles import Font, PatternFill
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.worksheet.worksheet import Worksheet
+
 import dxpy
 from dxpy import DXDataObject
 
@@ -41,7 +42,9 @@ def read_dxfile(
 
 
 def _add_extra_columns(
-    worksheet: Worksheet, extra_cols: dict[str, str]
+    worksheet: Worksheet,
+    extra_cols: dict[str, str],
+    start: int = 1
 ) -> None:
     """
     Inserts additional columns with formulas at the beginning of a sheet
@@ -52,6 +55,9 @@ def _add_extra_columns(
         The worksheet where columns will be added.
     extra_cols : dict[str, str]
         A mapping of column names to Excel formulas
+    start : int, optional
+        The column index (1-based) where extra columns should be inserted.
+        Defaults to 1 (beginning of the sheet).
 
     Returns
     -------
@@ -59,9 +65,9 @@ def _add_extra_columns(
     """
 
     num_cols = len(extra_cols)
-    worksheet.insert_cols(1, amount=num_cols)
+    worksheet.insert_cols(start, amount=num_cols)
 
-    for i, (col, formula) in enumerate(extra_cols.items(), start=1):
+    for i, (col, formula) in enumerate(extra_cols.items(), start=start):
         worksheet.cell(row=1, column=i, value=col)
         for row in range(2, worksheet.max_row + 1):
             worksheet.cell(row=row, column=i, value=formula.replace("{row}", str(row)))
@@ -86,7 +92,7 @@ def _apply_header_format(worksheet) -> None:
         cell.font = header_font
 
 
-def _adjust_column_widths(worksheet):
+def _adjust_column_widths(worksheet, min_width=14, max_width=40):
     """
     Adjusts column widths for better visibility.
 
@@ -94,16 +100,26 @@ def _adjust_column_widths(worksheet):
     ----------
     worksheet : Worksheet
         The worksheet where column widths will be adjusted.
+    min_width : int
+        The min width a column should have.
+    max_width : int
+        The max width a column should have.
 
     Returns
     -------
     None
     """
-    for cell in worksheet[1]:  # Iterate over header row
-        col_letter = cell.column_letter
-        worksheet.column_dimensions[col_letter].width = max(
-            len(str(cell.value)) + 2, 12
-        )
+    for col_cells in worksheet.columns:
+        col_letter = col_cells[0].column_letter
+        _max = min_width
+
+        for cell in col_cells:
+            val = cell.value
+            if val and not (isinstance(val, str) and val.startswith('=')):
+                _max = max(_max, len(str(val))) 
+        
+        # Set column width with a cap of max_width
+        worksheet.column_dimensions[col_letter].width = min(_max + 2, max_width)
 
 def _set_tab_color(worksheet, hex_color: str) -> None:
     """Sets worksheet tab colour
@@ -116,6 +132,52 @@ def _set_tab_color(worksheet, hex_color: str) -> None:
         Hex colour code for the sheet tab
     """
     worksheet.sheet_properties.tabColor = hex_color
+
+
+def highlight_max_ffpm(worksheet, source_df, ffpm_col="FFPM", index_col="SPECIMEN"):
+    """
+    Conditionally formats rows with maximum FFPM value per specimen(index).
+    
+    Parameters
+    ----------
+    worksheet : Worksheet
+        The worksheet where conditional formatting will be applied
+    source_df : pandas.DataFrame
+        The source data written to sheet
+    ffpm_col : str, optional
+        Name of the FFPM column in the DataFrame, default is "FFPM"
+    index_col : str, optional
+        Name of the column to use for grouping ffpm, default is "SPECIMEN"
+        
+    Returns
+    -------
+    None
+    """
+    
+    # Create a light green fill pattern for highlighting
+    green_fill = PatternFill(
+        start_color="CCFFCC",
+        end_color="CCFFCC",
+        fill_type="solid"
+    )
+    
+    # Reset index if it's a multi-index df to make processing easier
+    if isinstance(source_df.index, pd.MultiIndex):
+        df = source_df.reset_index()
+    else:
+        df = source_df.copy()
+    
+    # Find the max FFPM per specimen
+    max_ffpm = df.groupby(index_col)[ffpm_col].transform("max")
+    max_rows = df[(df[ffpm_col] == max_ffpm)].index.tolist()
+    
+    # Apply conditional formatting
+    for idx in max_rows:
+        row_idx = idx + 2  # adjust for 0-indexing in pandas
+        for col_idx in range(1, worksheet.max_column + 1):
+            cell = worksheet.cell(row=row_idx, column=col_idx)
+            cell.fill = green_fill
+
     
 
 def write_df_to_sheet(

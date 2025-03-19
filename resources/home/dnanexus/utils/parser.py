@@ -78,13 +78,11 @@ def make_fastqc_pivot(df:pd.DataFrame, pivot_config:dict) -> pd.DataFrame:
         created pivot table with computed columns
     """
     df["SPECIMEN"] = df["Sample"].astype(str).str[10:20]
-    # omit EPIC col for now
     
     pivot_df = create_pivot_table(df, pivot_config)
     pivot_df = pivot_df.reset_index(drop=False)
     
     return pivot_df
-    
     
     
 def _parse_fusion_files(dxfiles: List[DXDataObject]) -> pd.DataFrame:
@@ -164,13 +162,13 @@ def make_sf_pivot(
     Parameters
     ----------
     sf_df : pd.DataFrame
-        Main STAR-Fusion data
+        Current STAR-Fusion data
     sf_runs_df : pd.DataFrame
         Historical STAR-Fusion data
     fastqc_pivot_df : pd.DataFrame
         FastQC summary data
     fi_df : pd.DataFrame
-        Main Fusion Inspector data
+        Current Fusion Inspector data
     pivot_config : dict
         Pivot configuration parameters
 
@@ -187,7 +185,7 @@ def make_sf_pivot(
         df['SPECIMEN'] = df['file_name'].astype(str).str[10:20]
     
         # =LEFT(K{row},28)
-        df['FNAME'] = df['file_name'].astype(str).str[:28]
+        df['Filename'] = df['file_name'].astype(str).str[:28]
         
     # =CONCAT(A{row},"_",L{row})
     df['ID'] = df['SPECIMEN'] + "_" + df['#FusionName']
@@ -201,9 +199,11 @@ def make_sf_pivot(
             sf_runs_df[['#FusionName', 'Count_Run_1_Run_20_predicted']],
             on='#FusionName',
             how='left'
+        ).rename(
+            columns={'Count_Run_1_Run_20_predicted':'Count_predicted'}
         )
-        df['Count_Run_1_Run_20_predicted'] = (
-            df['Count_Run_1_Run_20_predicted']
+        df['Count_predicted'] = (
+            df['Count_predicted']
             .fillna(0)
             .astype(int)
         )
@@ -218,6 +218,7 @@ def make_sf_pivot(
 
     # Merge Fusion Inspector data
     if not fi_df.empty:
+        fi_df['LEFTRIGHT'] = fi_df['LeftBreakpoint'] + "_" + fi_df['RightBreakpoint']
         df = df.merge(
             fi_df[['LEFTRIGHT','PROT_FUSION_TYPE']],
             on='LEFTRIGHT',
@@ -225,6 +226,17 @@ def make_sf_pivot(
         ).rename(columns={'PROT_FUSION_TYPE': 'FRAME'})
 
     # Create final pivot table
+    df = df.sort_values(by=["SPECIMEN", "FFPM"]).reset_index(drop=True)
     pivot_df = create_pivot_table(df, pivot_config)
+    pivot_df = pivot_df[
+        [
+        "LEFTRIGHT",
+        "JunctionReadCount",
+        "SpanningFragCount",
+        "Count_predicted",
+        "FRAME",
+        "FFPM",
+    ]
+    ]
     
     return pivot_df
