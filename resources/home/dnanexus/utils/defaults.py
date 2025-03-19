@@ -68,11 +68,17 @@ FASTQC_PIVOT_CONFIG = {
     "aggfunc": "sum",
     "sheet_name": "FastQC_Pivot",
     "tab_color": "00FF00",
-    "add_total_row": True
+    "add_total_row": True,
 }
 
 SF_PIVOT_CONFIG = {
-    "index": ["Filename", "SPECIMEN","Unique Reads(M)","Duplicate Reads(M)", "#FusionName"],
+    "index": [
+        "Filename",
+        "SPECIMEN",
+        "Unique Reads(M)",
+        "Duplicate Reads(M)",
+        "#FusionName",
+    ],
     "columns": None,
     "values": [
         "FFPM",
@@ -83,7 +89,7 @@ SF_PIVOT_CONFIG = {
         "LEFTRIGHT",
     ],
     "aggfunc": {
-        "LEFTRIGHT": "first", 
+        "LEFTRIGHT": "first",
         "FRAME": "first",
         "FFPM": "first",
         "Count_predicted": "first",
@@ -91,5 +97,5 @@ SF_PIVOT_CONFIG = {
         "JunctionReadCount": "first",
     },
     "sheet_name": "Summary",
-    "tab_color": "9400D3"
+    "tab_color": "9400D3",
 }

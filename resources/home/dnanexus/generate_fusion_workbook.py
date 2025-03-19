@@ -36,7 +36,7 @@ from utils.utils import (
     get_project_info,
     read_dxfile,
     write_df_to_sheet,
-    highlight_max_ffpm
+    highlight_max_ffpm,
 )
 
 
@@ -109,7 +109,7 @@ def main(
 
         # Add Fusion Inspector data
         write_df_to_sheet(writer, df_fusioninspector, **FI_SHEET_CONFIG)
-        
+
         # Add STAR-Fusion data
         write_df_to_sheet(writer, df_starfusion, **SF_SHEET_CONFIG)
         sf_pivot = make_sf_pivot(
@@ -117,14 +117,14 @@ def main(
             df_sf_previous,
             fastqc_pivot,
             df_fusioninspector,
-            SF_PIVOT_CONFIG
+            SF_PIVOT_CONFIG,
         )
         write_df_to_sheet(
             writer,
             sf_pivot,
             sheet_name=SF_PIVOT_CONFIG["sheet_name"],
             tab_color=SF_PIVOT_CONFIG["tab_color"],
-            include_index=True
+            include_index=True,
         )
         summary_sheet = writer.sheets[SF_PIVOT_CONFIG["sheet_name"]]
         highlight_max_ffpm(summary_sheet, sf_pivot)
