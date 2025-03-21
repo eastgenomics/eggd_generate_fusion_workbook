@@ -1,0 +1,80 @@
+{
+    "name": "eggd_generate_fusion_workbook",
+    "title": "eggd_generate_fusion_workbook",
+    "summary": "App for fusion workbook",
+    "dxapi": "1.0.0",
+    "version": "1.0.0",
+    "inputSpec": [
+      {
+        "name": "starfusion_files",
+        "label": "starfusion_files",
+        "class": "array:file",
+        "optional": false,
+        "help": "STAR-Fusion output files containing fusion gene candidates and their supporting evidence"
+      },
+      {
+        "name": "fusioninspector_files",
+        "label": "fusioninspector_files",
+        "class": "array:file",
+        "optional": false,
+        "help": "FusionInspector output files for validation of fusions"
+      },
+      {
+        "name": "fastqc_data",
+        "label": "fastqc_data",
+        "class": "file",
+        "optional": false,
+        "help": "FastQC output file containing quality metrics for the sequencing data"
+      },
+      {
+        "name": "SF_previous_runs_data",
+        "class": "file",
+        "optional": false,
+        "help": "File containing info of STAR-Fusion's predictons from previous runs"
+      },
+      {
+        "name": "FI_previous_runs_data",
+        "class": "file",
+        "optional": false,
+        "help": "File containing info of FusionInspector's predictons from previous runs"
+      }
+    ],
+    "outputSpec": [
+      {
+        "name": "fusion_workbook",
+        "label": "fusion_workbook",
+        "class": "file",
+        "patterns": [
+          "*.xlsx"
+        ],
+        "help": "Workbook containing fusion genes and associated QC and metadata"
+      }
+    ],
+    "runSpec": {
+      "timeoutPolicy": {
+        "*": {
+          "hours": 2
+        }
+      },
+      "interpreter": "python3",
+      "file": "resources/home/dnanexus/generate_fusion_workbook.py",
+      "distribution": "Ubuntu",
+      "release": "24.04",
+      "version": "0"
+    },
+    "access": {
+      "project": "CONTRIBUTE"
+    },
+    "regionalOptions": {
+      "aws:eu-central-1": {
+        "systemRequirements": {
+          "*": {
+            "instanceType": "mem1_ssd1_v2_x4"
+          }
+        }
+      }
+    },
+    "developers": ["org-emee_1"],
+    "authorizedUsers": ["org-emee_1"]
+  }
+  
