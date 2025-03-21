@@ -3,12 +3,45 @@ pandas data frame
 """
 
 from concurrent.futures import ThreadPoolExecutor
+from typing import List
+
 import dxpy
 import pandas as pd
 from dxpy import DXDataObject
-from typing import List
 
-from .utils import read_dxfile, create_pivot_table
+from .utils import create_pivot_table, read_dxfile
+
+
+def parse_specimen_id(sample:str) -> str:
+    """parse SP ID from sample name
+
+    Parameters
+    ----------
+    sample : str
+        sample name in format 12345678-2XXXXSXXX-25PCAN4-10011_S33_L001_R1
+
+    Returns
+    -------
+    str
+        extracted SP eg 2XXXXSXXX
+    """
+    return sample.split("-")[1]
+
+
+def parse_igv_specimen_name(sample:str) -> str:
+    """parse SP ID from sample name in IGV format
+
+    Parameters
+    ----------
+    sample : str
+        sample name in format 12345678-2XXXXSXXX-25PCAN4-10011_S33_L001_R1
+
+    Returns
+    -------
+    str
+        extracted SP eg 12345678-2XXXXSXXX-25PCAN4
+    """
+    return "-".join(sample.split("-")[:3])
 
 
 def parse_fastqc(dxfile: DXDataObject) -> pd.DataFrame:
@@ -43,8 +76,8 @@ def parse_fastqc(dxfile: DXDataObject) -> pd.DataFrame:
         (df["total_deduplicated_percentage"] / 100.0) * df["Total Sequences"]
     ).astype(int)
     df["Duplicate Reads"] = (df["Total Sequences"] - df["Unique Reads"]).astype(int)
-    df["Unique Reads(M)"] = df["Unique Reads"] / 1000000
-    df["Duplicate Reads(M)"] = df["Duplicate Reads"] / 1000000
+    df["Unique Reads(M)"] = df["Unique Reads"] / 1_000_000
+    df["Duplicate Reads(M)"] = df["Duplicate Reads"] / 1_000_000
     df = df[
         [
             "Sample",
@@ -73,7 +106,7 @@ def make_fastqc_pivot(df: pd.DataFrame, pivot_config: dict) -> pd.DataFrame:
     pd.DataFrame
         created pivot table with computed columns
     """
-    df["SPECIMEN"] = df["Sample"].astype(str).str[10:20]
+    df["SPECIMEN"] = df["Sample"].apply(parse_specimen_id)
 
     pivot_df = create_pivot_table(df, pivot_config)
     pivot_df = pivot_df.reset_index(drop=False)
@@ -102,7 +135,19 @@ def _parse_fusion_files(dxfiles: List[DXDataObject]) -> pd.DataFrame:
 
     max_workers = min(16, len(dxfiles))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        df = pd.concat(executor.map(read_dxfile, dxfiles))
+        futures = [executor.submit(read_dxfile, dxfile) for dxfile in dxfiles]
+        results = []
+        for future in futures:
+           try:
+                results.append(future.result())
+           except Exception as e:
+               # Log the error and continue with other files
+              print(f"Error processing file: {e}")
+        
+        if not results:
+           return pd.DataFrame()
+        
+        df = pd.concat(results)
 
     return df
 
@@ -176,17 +221,13 @@ def make_sf_pivot(
 
     df = sf_df.copy()
 
-    # =MID(K{row},11,10)
     if "file_name" in sf_df.columns:
-        df["SPECIMEN"] = df["file_name"].astype(str).str[10:20]
+        df["SPECIMEN"] = df["file_name"].apply(parse_specimen_id)
 
-        # =LEFT(K{row},28)
-        df["Filename"] = df["file_name"].astype(str).str[:28]
+        df["Filename"] = df["file_name"].apply(parse_igv_specimen_name)
 
-    # =CONCAT(A{row},"_",L{row})
     df["ID"] = df["SPECIMEN"] + "_" + df["#FusionName"]
 
-    # =CONCATENATE(S{row},"_",U{row})
     df["LEFTRIGHT"] = df["LeftBreakpoint"] + "_" + df["RightBreakpoint"]
 
     # Merge previous runs data (VLOOKUP equivalent)

@@ -5,10 +5,10 @@ Collates Fusion candidates and associated metadata from STAR-Fusion, FusionInspe
 
 ## What inputs are required for this app to run?
 - `-istarfusion_files` : An array of DNAnexus file IDs of STAR-Fusion's prediction files
-- `-ifusioninspector_files` : An array of DNAnexus file IDs of FusionInspector's validation files
+- `-ifusioninspector_files` : An array of DNAnexus file IDs of FusionInspector's output files
 - `-ifastqc_data`: The DNAnexus file ID of FASTQC metrics file
-- `SF_previous_runs_data` : The DNAnexus file ID of a static file containing historical STAR-Fusion data
-- `FI_previous_runs_data` : The DNAnexus file ID of a static file containing historical FusionInspector data
+- `-iSF_previous_runs_data` : The DNAnexus file ID of a static file containing historical STAR-Fusion data
+- `-iFI_previous_runs_data` : The DNAnexus file ID of a static file containing historical FusionInspector data
 
 ## How does this app work?
 - Parses all inputs and format data according to structure of source data
@@ -16,7 +16,7 @@ Collates Fusion candidates and associated metadata from STAR-Fusion, FusionInspe
 - Writes a summary sheet using selected data from the different sources
 
 ## What does this app output?
-- A Fusion Workbook named as `{project_name}_fusion_workboo.xlsx`
+- A Fusion Workbook named as `{project_name}_fusion_workbook.xlsx`
 
 #### TODO
 - Add unit tests

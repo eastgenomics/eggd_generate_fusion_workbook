@@ -2,14 +2,14 @@
 """
 
 import os
-import pandas as pd
+
+import dxpy
 import openpyxl
+import pandas as pd
+from dxpy import DXDataObject
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.worksheet.worksheet import Worksheet
-
-import dxpy
-from dxpy import DXDataObject
 
 
 def read_dxfile(
@@ -268,6 +268,6 @@ def get_project_info() -> tuple[str, str]:
 
     # Get name of project for output naming
     project_name = dxpy.describe(project_id)["name"]
-    project_name = "_".join(project_name.split("_")[1:])
+    project_name = project_name.split("_", 1)[1]
 
     return project_name, project_id
