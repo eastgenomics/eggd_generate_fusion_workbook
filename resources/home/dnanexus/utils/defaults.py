@@ -21,8 +21,8 @@ SF_SHEET_CONFIG = {
         "Count_predicted": "=VLOOKUP(L{row},'SF_Previous_Runs'!E:F,2,0)",
         "EPIC": "=VLOOKUP(A{row},'EPIC'!AJ:AK,2,0)",
         "DAYS COUNT": "=VLOOKUP(A{row},'EPIC'!AJ:AL,3,0)",
-        "Unique Reads(M)": "=VLOOKUP(A{row},'FastQC_Pivot'!A:B,3,0)",
-        "Duplicate Reads(M)": "=VLOOKUP(A{row},'FastQC_Pivot'!A:C,2,0)",
+        "Unique Reads(M)": "=VLOOKUP(A{row},'FastQC_Pivot'!A:C,3,0)",
+        "Duplicate Reads(M)": "=VLOOKUP(A{row},'FastQC_Pivot'!A:B,2,0)",
         "ID": '=CONCATENATE(A{row},"_",L{row})',
         "LEFTRIGHT": '=CONCATENATE(S{row},"_",U{row})',
         "FRAME": "=VLOOKUP(I{row},'Fusion_Inspector'!C:AM,32,0)",
@@ -77,7 +77,7 @@ SF_PIVOT_CONFIG = {
         "SPECIMEN",
         "Unique Reads(M)",
         "Duplicate Reads(M)",
-        "#FusionName",
+        "LEFTRIGHT",
     ],
     "columns": None,
     "values": [
@@ -86,16 +86,44 @@ SF_PIVOT_CONFIG = {
         "Count_predicted",
         "SpanningFragCount",
         "JunctionReadCount",
-        "LEFTRIGHT",
+        "#FusionName",
+        "LeftBreakpoint",
+        "RightBreakpoint"
     ],
     "aggfunc": {
-        "LEFTRIGHT": "first",
+        "#FusionName": "first",
         "FRAME": "first",
         "FFPM": "first",
         "Count_predicted": "first",
         "SpanningFragCount": "first",
         "JunctionReadCount": "first",
+        "LeftBreakpoint": "first",
+        "RightBreakpoint": "first"
     },
     "sheet_name": "Summary",
     "tab_color": "9400D3",
+    "drop_downs": {
+        "Reported": {
+            "options": ["Yes", "No",],
+            "prompt": "Choose Yes or No",
+            "title": "Fusion reported or not?"
+            },
+        "Oncogenicity": {
+            "options": [
+                "Pathogenic",
+                "Likely Pathogenic",
+                "VUS",
+                "Likely Benign",
+                "Benign",
+                ],
+            "prompt": "Select from the list",
+            "title": "Oncogenicity"
+            
+        }
+        
+    },
+    "extra_cols":{
+        "EPIC": "=VLOOKUP(B{row},'EPIC'!AJ:AK,2,0)",
+        "DAYS COUNT": "=VLOOKUP(B{row},'EPIC'!AJ:AL,3,0)",
+    },
 }

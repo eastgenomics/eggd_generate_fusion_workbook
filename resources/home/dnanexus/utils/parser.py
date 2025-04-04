@@ -251,11 +251,14 @@ def make_sf_pivot(
         ).rename(columns={"PROT_FUSION_TYPE": "FRAME"})
 
     # Create final pivot table
-    df = df.sort_values(by=["SPECIMEN", "FFPM"]).reset_index(drop=True)
+    df = df.sort_values(by=["FFPM"]).reset_index(drop=True)
+    
     pivot_df = create_pivot_table(df, pivot_config)
     pivot_df = pivot_df[
         [
-            "LEFTRIGHT",
+            "LeftBreakpoint",
+            "#FusionName",
+            "RightBreakpoint",
             "JunctionReadCount",
             "SpanningFragCount",
             "Count_predicted",

@@ -25,6 +25,7 @@ from utils.defaults import (
     FASTQC_PIVOT_CONFIG,
     SF_PIVOT_CONFIG,
 )
+from utils.excel import format_workbook
 from utils.parser import (
     parse_fastqc,
     parse_fusion_inspector,
@@ -32,11 +33,12 @@ from utils.parser import (
     make_fastqc_pivot,
     make_sf_pivot,
 )
+from utils.summary_sheet import write_summary
 from utils.utils import (
     get_project_info,
     read_dxfile,
     write_df_to_sheet,
-    highlight_max_ffpm,
+    configure_workbook_defaults
 )
 
 
@@ -119,15 +121,12 @@ def main(
             df_fusioninspector,
             SF_PIVOT_CONFIG,
         )
-        write_df_to_sheet(
+        write_summary(
             writer,
             sf_pivot,
-            sheet_name=SF_PIVOT_CONFIG["sheet_name"],
-            tab_color=SF_PIVOT_CONFIG["tab_color"],
-            include_index=True,
+            SF_PIVOT_CONFIG
         )
-        summary_sheet = writer.sheets[SF_PIVOT_CONFIG["sheet_name"]]
-        highlight_max_ffpm(summary_sheet, sf_pivot)
+        format_workbook(writer)
 
     fusion_workbook = dxpy.upload_local_file(outfile)
 

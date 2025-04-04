@@ -1,7 +1,9 @@
 """general and I/O utilities
 """
 
+import re
 import os
+from urllib.parse import quote
 
 import dxpy
 import openpyxl
@@ -133,49 +135,6 @@ def _set_tab_color(worksheet, hex_color: str) -> None:
     worksheet.sheet_properties.tabColor = hex_color
 
 
-def highlight_max_ffpm(worksheet, source_df, ffpm_col="FFPM", index_col="SPECIMEN"):
-    """
-    Conditionally formats rows with maximum FFPM value per specimen(index).
-
-    Parameters
-    ----------
-    worksheet : Worksheet
-        The worksheet where conditional formatting will be applied
-    source_df : pandas.DataFrame
-        The source data written to sheet
-    ffpm_col : str, optional
-        Name of the FFPM column in the DataFrame, default is "FFPM"
-    index_col : str, optional
-        Name of the column to use for grouping ffpm, default is "SPECIMEN"
-
-    Returns
-    -------
-    None
-    """
-
-    # Create a light green fill pattern for highlighting
-    green_fill = PatternFill(
-        start_color="CCFFCC", end_color="CCFFCC", fill_type="solid"
-    )
-
-    # Reset index if it's a multi-index df to make processing easier
-    if isinstance(source_df.index, pd.MultiIndex):
-        df = source_df.reset_index()
-    else:
-        df = source_df.copy()
-
-    # Find the max FFPM per specimen
-    max_ffpm = df.groupby(index_col)[ffpm_col].transform("max")
-    max_rows = df[(df[ffpm_col] == max_ffpm)].index.tolist()
-
-    # Apply conditional formatting
-    for idx in max_rows:
-        row_idx = idx + 2  # adjust for 0-indexing in pandas
-        for col_idx in range(1, worksheet.max_column + 1):
-            cell = worksheet.cell(row=row_idx, column=col_idx)
-            cell.fill = green_fill
-
-
 def write_df_to_sheet(
     writer: pd.ExcelWriter,
     df: pd.DataFrame,
@@ -254,6 +213,13 @@ def create_pivot_table(
 
     return pivot_df
 
+def configure_workbook_defaults(writer):
+    """Sets Calibri as default font for all sheets"""
+    wb = writer.book
+    
+    calibri_font = Font(name='Calibri', size=11)
+    wb._named_styles['Normal'].font = calibri_font
+    
 
 def get_project_info() -> tuple[str, str]:
     """Get the project name for naming output file
@@ -271,3 +237,26 @@ def get_project_info() -> tuple[str, str]:
     project_name = project_name.split("_", 1)[1]
 
     return project_name, project_id
+
+
+def generate_varsome_url(breakpoint:str) -> str:
+    """Generate VarSome URL from breakpoint string.
+
+    Parameters
+    ----------
+    breakpoint : str
+        Genomic coordinate in format "chr15:39594440:+" or "chr15:39594440:-"
+
+    Returns
+    -------
+    str
+        Enconded Varsome URL string
+    """
+    
+    base_url = "https://varsome.com/position/hg38/"
+    
+    # remove ':' followed by '+' or '-' only at the end
+    bp = re.sub(r'[:][+\-]$', '', breakpoint)
+    encoded = quote(bp)
+    
+    return f"{base_url}{encoded}"
