@@ -9,23 +9,23 @@ from openpyxl.styles import PatternFill, Border, Side, Alignment
 
 from .excel import (
     alternate_specimen_colors,
-    highlight_borders,
+    highlight_specimen_borders,
+    style_borders,
     set_column_width,
     align_column_cells,
     add_drop_down_col,
     get_col_letter,
+    write_df_to_sheet,
+    drop_column,
 )
-from .utils import write_df_to_sheet
-
-
 
 def add_databar_to_ffpm(worksheet, df, ffpm_col, index_col):
     """
-    Conditionally add databar to FFPM col.
+    Conditionally add databar to FFPM col (groupby specimen).
 
     Parameters
     ----------
-    worksheet : Worksheet
+    worksheet : openpyxl.worksheet.worksheet.Worksheet
         The worksheet where conditional formatting will be applied
     df : pandas.DataFrame
        Data frame containing original summary data
@@ -38,7 +38,6 @@ def add_databar_to_ffpm(worksheet, df, ffpm_col, index_col):
     -------
     None
     """
-    
     # Get col letter for FFPM
     col_letter = get_col_letter(worksheet, ffpm_col)
     
@@ -55,7 +54,7 @@ def add_databar_to_ffpm(worksheet, df, ffpm_col, index_col):
             start_value=0,
             end_type="num",
             end_value=max_ffpm,
-            color="FF006100",
+            color="0000FF00",
             showValue=True
         )
         worksheet.conditional_formatting.add(cell_range, rule)
@@ -63,50 +62,6 @@ def add_databar_to_ffpm(worksheet, df, ffpm_col, index_col):
     # adjust cells to display databar correctly
     set_column_width(worksheet, col_letter, 10.0)
     align_column_cells(worksheet, col_letter)
-
-
-            
-def format_worksheet(worksheet):
-    """normal formatting to entire sheet"""
-    normal_border = Border(left=Side(style='thin'), 
-                         right=Side(style='thin'),
-                         top=Side(style='thin'), 
-                         bottom=Side(style='thin'))
-
-    for row in worksheet.iter_rows():
-        for cell in row:
-            cell.border = normal_border
-            cell.alignment = Alignment(horizontal='left')
-
-
-def format_summary_sheet(worksheet, source_df, ffpm_col="FFPM", index_col="SPECIMEN"):
-    """
-    Conditionally formats summary sheet rows per specimen.
-
-    Parameters
-    ----------
-    worksheet : Worksheet
-        The worksheet where conditional formatting will be applied
-    source_df : pandas.DataFrame
-        The source data written to sheet
-    ffpm_col : str, optional
-        Name of the FFPM column in the DataFrame, default is "FFPM"
-    index_col : str, optional
-        Name of the column to use for grouping ffpm, default is "SPECIMEN"
-
-    Returns
-    -------
-    None
-    """
-    
-    df = source_df.copy()
-    if isinstance(df.index, pd.MultiIndex):
-        df.reset_index(inplace=True)
-    
-    #format_worksheet(worksheet)
-    add_databar_to_ffpm(worksheet, df, ffpm_col, index_col)
-    #alternate_specimen_colors(worksheet, df, index_col)
-    highlight_borders(worksheet, df, index_col)
 
 
 def add_lookup_columns(
@@ -164,7 +119,42 @@ def add_lookup_columns(
             # Clear other merged cells (they inherit from first cell)
             for row in range(start + 1, end + 1):
                 worksheet.cell(row=row, column=new_col_idx, value=None)
+
+
+def format_summary_sheet(
+    worksheet,
+    source_df,
+    ffpm_col="FFPM",
+    index_col="SPECIMEN"
+) -> None:
+    """
+    Conditionally formats summary sheet rows per specimen.
+
+    Parameters
+    ----------
+    worksheet : Worksheet
+        The worksheet where conditional formatting will be applied
+    source_df : pandas.DataFrame
+        The source data written to sheet
+    ffpm_col : str, optional
+        Name of the FFPM column in the DataFrame, default is "FFPM"
+    index_col : str, optional
+        Name of the column to use for grouping ffpm, default is "SPECIMEN"
+
+    Returns
+    -------
+    None
+    """
     
+    df = source_df.copy()
+    if isinstance(df.index, pd.MultiIndex):
+        df.reset_index(inplace=True)
+    
+    style_borders(worksheet)
+    add_databar_to_ffpm(worksheet, df, ffpm_col, index_col)
+    alternate_specimen_colors(worksheet, df, index_col)
+    highlight_specimen_borders(worksheet, df, index_col)
+
 
 def write_summary(
     writer: pd.ExcelWriter,
@@ -193,6 +183,7 @@ def write_summary(
         include_index=True,
     )
     summary_sheet = writer.sheets[sheet_name]
+    drop_column(summary_sheet, "LEFTRIGHT")
     
     add_lookup_columns(summary_sheet, lookup_cols)
     

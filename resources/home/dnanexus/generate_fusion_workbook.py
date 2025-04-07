@@ -25,7 +25,7 @@ from utils.defaults import (
     FASTQC_PIVOT_CONFIG,
     SF_PIVOT_CONFIG,
 )
-from utils.excel import format_workbook
+from utils.excel import format_workbook,  write_df_to_sheet
 from utils.parser import (
     parse_fastqc,
     parse_fusion_inspector,
@@ -37,8 +37,6 @@ from utils.summary_sheet import write_summary
 from utils.utils import (
     get_project_info,
     read_dxfile,
-    write_df_to_sheet,
-    configure_workbook_defaults
 )
 
 

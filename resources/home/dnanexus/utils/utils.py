@@ -6,12 +6,8 @@ import os
 from urllib.parse import quote
 
 import dxpy
-import openpyxl
 import pandas as pd
 from dxpy import DXDataObject
-from openpyxl.styles import Font, PatternFill
-from openpyxl.utils.dataframe import dataframe_to_rows
-from openpyxl.worksheet.worksheet import Worksheet
 
 
 def read_dxfile(
@@ -42,139 +38,21 @@ def read_dxfile(
 
     return df
 
-
-def _add_extra_columns(
-    worksheet: Worksheet, extra_cols: dict[str, str], start: int = 1
-) -> None:
+def get_column_dtypes(columns: list) -> dict:
     """
-    Inserts additional columns with formulas at the beginning of a sheet
+    Filter the predefined DataFrame types against given columns.
 
     Parameters
     ----------
-    worksheet : Worksheet
-        The worksheet where columns will be added.
-    extra_cols : dict[str, str]
-        A mapping of column names to Excel formulas
-    start : int, optional
-        The column index (1-based) where extra columns should be inserted.
-        Defaults to 1 (beginning of the sheet).
+    columns : list
+        List of columns to get dtypes for
 
     Returns
     -------
-    None
+    dict
+        Mapping of columns to defined dtype
     """
-
-    num_cols = len(extra_cols)
-    worksheet.insert_cols(start, amount=num_cols)
-
-    for i, (col, formula) in enumerate(extra_cols.items(), start=start):
-        worksheet.cell(row=1, column=i, value=col)
-        for row in range(2, worksheet.max_row + 1):
-            worksheet.cell(row=row, column=i, value=formula.replace("{row}", str(row)))
-
-
-def _apply_header_format(worksheet) -> None:
-    """
-    Applies bold formatting to all headers in the sheet.
-
-    Parameters
-    ----------
-    worksheet : Worksheet
-        The worksheet where header formatting will be applied.
-
-    Returns
-    -------
-    None
-    """
-    header_font = Font(bold=True)
-    for col in range(1, worksheet.max_column + 1):
-        cell = worksheet.cell(row=1, column=col)
-        cell.font = header_font
-
-
-def _adjust_column_widths(worksheet, min_width=14, max_width=40):
-    """
-    Adjusts column widths for better visibility.
-
-    Parameters
-    ----------
-    worksheet : Worksheet
-        The worksheet where column widths will be adjusted.
-    min_width : int
-        The min width a column should have.
-    max_width : int
-        The max width a column should have.
-
-    Returns
-    -------
-    None
-    """
-    for col_cells in worksheet.columns:
-        col_letter = col_cells[0].column_letter
-        _max = min_width
-
-        for cell in col_cells:
-            val = cell.value
-            if val and not (isinstance(val, str) and val.startswith("=")):
-                _max = max(_max, len(str(val)))
-
-        # Set column width with a cap of max_width
-        worksheet.column_dimensions[col_letter].width = min(_max + 2, max_width)
-
-
-def _set_tab_color(worksheet, hex_color: str) -> None:
-    """Sets worksheet tab colour
-
-    Parameters
-    ----------
-    worksheet : Worksheet
-        The worksheet to apply tab colour
-    hex_color : str
-        Hex colour code for the sheet tab
-    """
-    worksheet.sheet_properties.tabColor = hex_color
-
-
-def write_df_to_sheet(
-    writer: pd.ExcelWriter,
-    df: pd.DataFrame,
-    sheet_name: str,
-    tab_color: str = "000000",
-    extra_cols: dict[str, str] = None,
-    include_index: bool = False,
-) -> None:
-    """Writes a Pandas DataFrame to an Excel sheet with formatting.
-
-    Parameters
-    ----------
-    writer : pd.ExcelWriter
-        The Excel writer object to write the sheet into
-    df : pd.DataFrame
-        The DataFrame containing the data.
-    sheet_name : str
-        Name of the Excel sheet
-    tab_color : str, optional
-        Hex colour code for the sheet tab. Defaults to black ("000000")
-    extra_cols : dict[str, str], optional
-        A mapping of new column names to excel formulas. Example:
-            {
-                "Specimen": "=MID(C{row},11,10)",
-                "EPIC": "=VLOOKUP(A{row},EPIC!AJ:AK,2,0)"
-            }
-    include_index : bool, optional
-        Wether to write index of df to sheet. Defaults to False
-    """
-    df.to_excel(writer, sheet_name=sheet_name, index=include_index)
-    worksheet = writer.sheets[sheet_name]
-
-    _set_tab_color(worksheet, tab_color)
-
-    # Add extra columns if provided
-    if extra_cols:
-        _add_extra_columns(worksheet, extra_cols)
-
-    _apply_header_format(worksheet)
-    _adjust_column_widths(worksheet)
+    return {column: DATAFRAME_TYPES[column] for column in columns}
 
 
 def create_pivot_table(
@@ -212,13 +90,6 @@ def create_pivot_table(
     )
 
     return pivot_df
-
-def configure_workbook_defaults(writer):
-    """Sets Calibri as default font for all sheets"""
-    wb = writer.book
-    
-    calibri_font = Font(name='Calibri', size=11)
-    wb._named_styles['Normal'].font = calibri_font
     
 
 def get_project_info() -> tuple[str, str]:

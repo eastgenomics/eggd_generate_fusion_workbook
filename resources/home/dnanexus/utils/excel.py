@@ -11,41 +11,131 @@ from openpyxl.styles import (
     Font
 )
 from openpyxl.worksheet.datavalidation import DataValidation
+from openpyxl.worksheet.worksheet import Worksheet
 
 from .utils import generate_varsome_url
 
 DEFAULT_FONT.name = 'Calibri'
+DEFAULT_FONT.size = 11
 
 
-def alternate_specimen_colors(worksheet, df, index_col):
-    """Apply alternate row colors between specimen groups.
+def add_extra_columns(
+    worksheet: Worksheet, 
+    extra_cols: dict[str, str], 
+    start: int = 1
+) -> None:
+    """
+    Inserts additional columns with formulas at the beginning of a sheet
 
     Parameters
     ----------
     worksheet : Worksheet
-        The sheet where formating will be applied
-    df : pd.DataFrame
-        Data frame containing original summary data
-    index_col : str
-        Column to use for grouping
+        The worksheet where columns will be added.
+    extra_cols : dict[str, str]
+        A mapping of column names to Excel formulas
+    start : int, optional
+        The column index (1-based) where extra columns should be inserted.
+        Defaults to 1 (beginning of the sheet).
+
+    Returns
+    -------
+    None
     """
-    blue_fill = PatternFill(start_color='FFB4C6E7', end_color='FFB4C6E7', fill_type='solid')
-    green_fill = PatternFill(start_color='FFC6E0B4', end_color='FFC6E0B4', fill_type='solid')
-    
-    colors = [blue_fill, green_fill]
-    
-    for i, (specimen, group) in enumerate(df.groupby(index_col)):
-        # alternate colors
-        fill = colors[i % len(colors)]
-    
-        # Apply fill to all rows in this group
-        for row in group.index:
-            excel_row = row + 2  
-            for col in range(1, worksheet.max_column + 1):
-                worksheet.cell(row=excel_row, column=col).fill = fill
+
+    num_cols = len(extra_cols)
+    worksheet.insert_cols(start, amount=num_cols)
+
+    for i, (col, formula) in enumerate(extra_cols.items(), start=start):
+        worksheet.cell(row=1, column=i, value=col)
+        for row in range(2, worksheet.max_row + 1):
+            worksheet.cell(
+                row=row, column=i, value=formula.replace("{row}", str(row))
+            )
 
 
-def highlight_borders(worksheet, df, index_col):
+def apply_header_format(worksheet) -> None:
+    """
+    Applies bold formatting to all headers in the sheet.
+
+    Parameters
+    ----------
+    worksheet : Worksheet
+        The worksheet where header formatting will be applied.
+
+    Returns
+    -------
+    None
+    """
+    header_font = Font(bold=True)
+    for col in range(1, worksheet.max_column + 1):
+        cell = worksheet.cell(row=1, column=col)
+        cell.font = header_font
+
+
+def adjust_column_widths(worksheet, min_width=14, max_width=40):
+    """
+    Adjusts all column widths in given sheet for better visibility.
+
+    Parameters
+    ----------
+    worksheet : Worksheet
+        The worksheet where column widths will be adjusted.
+    min_width : int
+        The min width a column should have.
+    max_width : int
+        The max width a column should have.
+
+    Returns
+    -------
+    None
+    """
+    for col_cells in worksheet.columns:
+        col_letter = col_cells[0].column_letter
+        _max = min_width
+
+        for cell in col_cells:
+            val = cell.value
+            if val and not (isinstance(val, str) and val.startswith("=")):
+                _max = max(_max, len(str(val)))
+
+        # Set column width with a cap of max_width
+        worksheet.column_dimensions[col_letter].width = min(_max + 2, max_width)
+
+
+def set_tab_color(worksheet, hex_color: str) -> None:
+    """Sets worksheet tab colour
+
+    Parameters
+    ----------
+    worksheet : Worksheet
+        The worksheet to apply tab colour
+    hex_color : str
+        Hex colour code for the sheet tab
+    """
+    worksheet.sheet_properties.tabColor = hex_color
+    
+
+def style_borders(worksheet, style="thin"):
+    """Apply style to all border of given sheet
+
+    Parameters
+    ----------
+    worksheet : openpyxl.worksheet.worksheet.Worksheet
+        The worksheet where style will be applied
+    style : str, optional
+        desired border style to apply, by default "thin"
+    """
+    border = Border(left=Side(style=style), 
+                         right=Side(style=style),
+                         top=Side(style=style), 
+                         bottom=Side(style=style))
+
+    for row in worksheet.iter_rows():
+        for cell in row:
+            cell.border = border
+
+
+def highlight_specimen_borders(worksheet, df, index_col):
     """Adds thick borders between specimen groups.
 
     Parameters
@@ -67,6 +157,55 @@ def highlight_borders(worksheet, df, index_col):
         excel_row = row + 2 
         for col in range(1, worksheet.max_column + 1):
             worksheet.cell(row=excel_row, column=col).border = thick_border
+            
+
+def alternate_specimen_colors(
+    worksheet, 
+    df,
+    index_col,
+    stop_col="FFPM",
+    start_row_idx=2,
+):
+    """Apply alternate row colors between specimen groups in summary sheet.
+
+    Parameters
+    ----------
+    worksheet : Worksheet
+        The sheet where formating will be applied
+    df : pd.DataFrame
+        Data frame containing original summary data
+    index_col : str
+        Column name to use for grouping
+    stop_col : str
+        Column name where formating should end.
+    start_row_idx : int
+        Excel row index where formating should start from.
+        Defaults 2 (when header row in at index 1)
+    """
+    blue_fill = PatternFill(
+        start_color='FFB4C6E7', end_color='FFB4C6E7', fill_type='solid'
+    )
+    green_fill = PatternFill(
+        start_color='FFC6E0B4', end_color='FFC6E0B4', fill_type='solid'
+    )
+    colors = [blue_fill, green_fill]
+    
+    col_letter = get_col_letter(worksheet, stop_col)
+    if not col_letter:
+        raise ValueError(f"stop_col '{stop_col}' not found in worksheet.")
+    stop_idx = openpyxl.utils.column_index_from_string(col_letter)
+    
+    last_rows = df.groupby(index_col).tail(1).index
+    current_row = start_row_idx
+    
+    for idx, last_row in enumerate(last_rows):
+        fill = colors[idx % len(colors)]
+        last_row = last_row + 3
+        for row in range(current_row, last_row):
+            for col in range(1, stop_idx):
+                worksheet.cell(row=row, column=col).fill = fill
+        
+        current_row = last_row
 
 
 def align_column_cells(worksheet, col_letter: str, direction: str = 'left'):
@@ -164,16 +303,18 @@ def add_drop_down_col(
     ws = sheet
     last_col = ws.max_column
 
-    # Insert at specific position or at the end
+    # Insert at specified position or at the end
     col_idx = position if position else last_col + 1
     ws.insert_cols(col_idx)
     col_letter = openpyxl.utils.get_column_letter(col_idx)
     ws[f"{col_letter}{start}"] = header_name
 
     # Create data validation for dropdown
+    options = f'"{", ".join(dropdown_options)}"'
+    
     dv = DataValidation(
         type="list",
-        formula1=f'"{",".join(dropdown_options)}"',
+        formula1=options,
         showDropDown=True,
         allow_blank=True,
     )
@@ -181,7 +322,7 @@ def add_drop_down_col(
     dv.promptTitle = title
     ws.add_data_validation(dv)
 
-    # Apply dropdown to all rows
+    # Applly to all rows
     for row in range(start + 1, ws.max_row + 1):
         dv.add(ws[f"{col_letter}{row}"])
         
@@ -249,7 +390,7 @@ def add_breakpoint_hyperlinks(
             if bp_col not in headers:
                 continue
 
-            col_idx = headers.index(bp_col) + 1  # 1-based
+            col_idx = headers.index(bp_col) + 1
             col_letter = openpyxl.utils.get_column_letter(col_idx)
 
             for row in range(header_row + 1, max_row + 1):
@@ -264,14 +405,15 @@ def add_breakpoint_hyperlinks(
                             f"Could not process {value} at {sheet_name}!{col_letter}{row}: {e}"
                         )
 
+
 def get_col_letter(worksheet, col_name) -> str:
     """
     Getting the column letter with specific col name
 
     Parameters
     ----------
-    worksheet: openpyxl.Writer
-            writer object of current sheet
+    worksheet: openpyxl.worksheet.worksheet.Worksheet
+            current sheet
     col_name: str
             name of column to get col letter
     Return
@@ -285,6 +427,74 @@ def get_col_letter(worksheet, col_name) -> str:
             col_letter = column_cell[0].column_letter
 
     return col_letter
+
+
+def drop_column(worksheet, col_name: str) -> bool:
+    """
+    Deletes a column from the worksheet given a column name
+
+    Parameters
+    ----------
+    worksheet : openpyxl.worksheet.worksheet.Worksheet
+        The worksheet from which to delete the column.
+    col_name : str
+        The header name of the column to delete.
+
+    Returns
+    -------
+    bool
+        True if the column was found and deleted, False otherwise.
+    """
+    col_letter = get_col_letter(worksheet, col_name)
+    if not col_letter:
+        print(f"Column '{col_name}' not found. No deletion performed.")
+        return False
+
+    col_index = openpyxl.utils.column_index_from_string(col_letter)
+    worksheet.delete_cols(col_index)
+    print(f"Deleted column '{col_name}' (column {col_letter}).")
+    return True
+
+
+def write_df_to_sheet(
+    writer: pd.ExcelWriter,
+    df: pd.DataFrame,
+    sheet_name: str,
+    tab_color: str = "000000",
+    extra_cols: dict[str, str] = None,
+    include_index: bool = False,
+) -> None:
+    """Writes a Pandas DataFrame to an Excel sheet with formatting.
+
+    Parameters
+    ----------
+    writer : pd.ExcelWriter
+        The Excel writer object to write the sheet into
+    df : pd.DataFrame
+        The DataFrame containing the data.
+    sheet_name : str
+        Name of the Excel sheet
+    tab_color : str, optional
+        Hex colour code for the sheet tab. Defaults to black ("000000")
+    extra_cols : dict[str, str], optional
+        A mapping of new column names to excel formulas. Example:
+            {
+                "Specimen": "=MID(C{row},11,10)",
+                "EPIC": "=VLOOKUP(A{row},EPIC!AJ:AK,2,0)"
+            }
+    include_index : bool, optional
+        Wether to write index of df to sheet. Defaults to False
+    """
+    df.to_excel(writer, sheet_name=sheet_name, index=include_index)
+    worksheet = writer.sheets[sheet_name]
+
+    set_tab_color(worksheet, tab_color)
+
+    # Add extra columns if provided
+    if extra_cols:
+        add_extra_columns(worksheet, extra_cols)
+
+    adjust_column_widths(worksheet)
 
 
 def format_workbook(writer) -> None:
@@ -302,5 +512,6 @@ def format_workbook(writer) -> None:
     
     for sheet in workbook.worksheets:
         colour_hyperlinks(sheet)
+        apply_header_format(sheet)
         
         # other general formating to follow here ...
