@@ -18,6 +18,7 @@ from .excel import (
     write_df_to_sheet,
     drop_column,
 )
+from .utils import validate_config
 
 def add_databar_to_ffpm(worksheet, df, ffpm_col, index_col):
     """
@@ -171,6 +172,14 @@ def write_summary(
     config : dict
         Config specifing styling and formating of sheet
     """
+    expected_keys = [
+        "sheet_name", 
+        "tab_color", 
+        "extra_cols", 
+        "drop_downs"
+    ]
+    validate_config(config, expected_keys)
+    
     sheet_name = config["sheet_name"]
     tab_color = config["tab_color"]
     lookup_cols = config["extra_cols"]

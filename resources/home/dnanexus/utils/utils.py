@@ -11,7 +11,11 @@ from dxpy import DXDataObject
 
 
 def read_dxfile(
-    dxfile: DXDataObject, sep: str = "\t", include_fname: bool = True
+    dxfile: DXDataObject, 
+    sep: str = "\t", 
+    include_fname: bool = True,
+    dtypes: dict = None,
+    usecols: list = None,
 ) -> pd.DataFrame:
     """reads a DNAnexus file object into a pandas dataframe
 
@@ -23,6 +27,10 @@ def read_dxfile(
         Delimeter of data values in files. Defaults to  "\t"
     include_fname : bool
         Specifies whether to set file name as first column. Defaults to True
+    dtypes : dict, optional
+        Dictionary specifying column data types. Defaults to None.
+    usecols : list, optional
+        List of column names or indices to read. Defaults to None (read all).
 
     Returns
     -------
@@ -37,6 +45,7 @@ def read_dxfile(
         df.insert(0, "file_name", fname)
 
     return df
+
 
 def get_column_dtypes(columns: list) -> dict:
     """
@@ -131,3 +140,26 @@ def generate_varsome_url(breakpoint:str) -> str:
     encoded = quote(bp)
     
     return f"{base_url}{encoded}"
+
+
+def validate_config(config: dict, expected_keys: list):
+    """
+    Validates that required keys exist in given config.
+
+    Parameters
+    ----------
+    config : dict
+        The config to validate.
+    expected_keys : list
+        List of expected keys to check in the config.
+
+    Raises
+    ------
+    ValueError
+        If any keys are missing.
+    """
+    missing_keys = [key for key in expected_keys if key not in config]
+    if missing_keys:
+        raise ValueError(
+            f"Missing required config key(s): {', '.join(missing_keys)}"
+        )

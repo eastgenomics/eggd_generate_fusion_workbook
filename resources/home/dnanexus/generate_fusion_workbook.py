@@ -18,7 +18,6 @@ import pandas as pd
 from utils.defaults import (
     EPIC_SHEET_CONFIG,
     FASTQC_SHEET_CONFIG,
-    FI_PREVIOUS_RUNS_SHEET_CONFIG,
     FI_SHEET_CONFIG,
     SF_PREVIOUS_RUNS_SHEET_CONFIG,
     SF_SHEET_CONFIG,
@@ -32,6 +31,7 @@ from utils.parser import (
     parse_star_fusion,
     make_fastqc_pivot,
     make_sf_pivot,
+    parse_sf_previous
 )
 from utils.summary_sheet import write_summary
 from utils.utils import (
@@ -46,7 +46,6 @@ def main(
     fusioninspector_files: List[dict],
     fastqc_data: dict,
     SF_previous_runs_data: dict,
-    FI_previous_runs_data: dict,
 ):
     """Generates a fusion workbook with data from
     STAR-Fusion, FusionInspector, and FastQC
@@ -61,8 +60,6 @@ def main(
         Mapping of DXLink to FastQC data file
     SF_previous_runs_data : str
        Mapping of DXLink to STAR-Fusion previous runs data file
-    FI_previous_runs_data : str
-        Mapping of DXLink to FusionInspector previous runs data file
 
     Returns
     -------
@@ -74,14 +71,11 @@ def main(
     fusioninspector_files = [dxpy.DXFile(item) for item in fusioninspector_files]
     fastqc_data = dxpy.DXFile(fastqc_data)
     sf_previous_data = dxpy.DXFile(SF_previous_runs_data)
-    fi_previous_data = dxpy.DXFile(FI_previous_runs_data)
 
     df_starfusion = parse_star_fusion(starfusion_files)
     df_fusioninspector = parse_fusion_inspector(fusioninspector_files)
     df_fastqc = parse_fastqc(fastqc_data)
-
-    df_sf_previous = read_dxfile(sf_previous_data, include_fname=False)
-    df_fi_previous = read_dxfile(fi_previous_data, sep=",", include_fname=False)
+    df_sf_previous = parse_sf_previous(sf_previous_data)
 
     project_name, _ = get_project_info()
     outfile = f"{project_name}_fusion_workbook.xlsx"
@@ -94,9 +88,6 @@ def main(
         # Add SF previous runs data
         write_df_to_sheet(writer, df_sf_previous, **SF_PREVIOUS_RUNS_SHEET_CONFIG)
 
-        # Add FI previous runs data
-        write_df_to_sheet(writer, df_fi_previous, **FI_PREVIOUS_RUNS_SHEET_CONFIG)
-
         # Add FastQC data
         write_df_to_sheet(writer, df_fastqc, **FASTQC_SHEET_CONFIG)
         fastqc_pivot = make_fastqc_pivot(df_fastqc, FASTQC_PIVOT_CONFIG)
@@ -106,9 +97,6 @@ def main(
             sheet_name=FASTQC_PIVOT_CONFIG["sheet_name"],
             tab_color=FASTQC_PIVOT_CONFIG["tab_color"],
         )
-
-        # Add Fusion Inspector data
-        write_df_to_sheet(writer, df_fusioninspector, **FI_SHEET_CONFIG)
 
         # Add STAR-Fusion data
         write_df_to_sheet(writer, df_starfusion, **SF_SHEET_CONFIG)

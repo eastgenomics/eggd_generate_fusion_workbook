@@ -44,6 +44,29 @@ def parse_igv_specimen_name(sample:str) -> str:
     return "-".join(sample.split("-")[:3])
 
 
+def parse_sf_previous(dxfile: DXDataObject) -> pd.DataFrame:
+    """Parse the content of sf_previous_run_data file
+
+    Parameters
+    ----------
+    dxfile : DXDataObject
+        DNAnexus file object containing data to parse
+
+    Returns
+    -------
+    pd.DataFrame
+        pandas dataframe containing selected columns
+    """
+
+    df = read_dxfile(dxfile, include_fname=False)
+    df = df[[
+        "#FusionName",
+        "Count_Run_1_Run_20_predicted"
+    ]]
+    
+    return df
+
+
 def parse_fastqc(dxfile: DXDataObject) -> pd.DataFrame:
     """Parse the content of fastqc multiqc output and compute required
     metrics from deduplicated_percentage

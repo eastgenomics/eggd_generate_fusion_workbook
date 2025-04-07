@@ -18,7 +18,7 @@ SF_SHEET_CONFIG = {
     "extra_cols": {
         "SPECIMEN": "=MID(K{row},11,10)",
         "FNAME": "=LEFT(K{row},28)",
-        "Count_predicted": "=VLOOKUP(L{row},'SF_Previous_Runs'!E:F,2,0)",
+        "Count_predicted": "=VLOOKUP(L{row},'PC1_PC20_Predicted'!A:B,2,0)",
         "EPIC": "=VLOOKUP(A{row},'EPIC'!AJ:AK,2,0)",
         "DAYS COUNT": "=VLOOKUP(A{row},'EPIC'!AJ:AL,3,0)",
         "Unique Reads(M)": "=VLOOKUP(A{row},'FastQC_Pivot'!A:C,3,0)",
@@ -40,16 +40,11 @@ FI_SHEET_CONFIG = {
 }
 
 SF_PREVIOUS_RUNS_SHEET_CONFIG = {
-    "sheet_name": "SF_Previous_Runs",
+    "sheet_name": "PC1_PC20_Predicted",
     "tab_color": "000000",
     "extra_cols": None,
 }
 
-FI_PREVIOUS_RUNS_SHEET_CONFIG = {
-    "sheet_name": "FI_Previous_Runs",
-    "tab_color": "000000",
-    "extra_cols": None,
-}
 
 EPIC_SHEET_CONFIG = {
     "sheet_name": "EPIC",

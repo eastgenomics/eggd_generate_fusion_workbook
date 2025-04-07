@@ -31,12 +31,6 @@
         "class": "file",
         "optional": false,
         "help": "File containing info of STAR-Fusion's predictons from previous runs"
-      },
-      {
-        "name": "FI_previous_runs_data",
-        "class": "file",
-        "optional": false,
-        "help": "File containing info of FusionInspector's predictons from previous runs"
       }
     ],
     "outputSpec": [
