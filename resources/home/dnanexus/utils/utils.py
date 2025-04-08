@@ -14,8 +14,6 @@ def read_dxfile(
     dxfile: DXDataObject,
     sep: str = "\t",
     include_fname: bool = True,
-    dtypes: dict = None,
-    usecols: list = None,
 ) -> pd.DataFrame:
     """reads a DNAnexus file object into a pandas dataframe
 
@@ -27,11 +25,7 @@ def read_dxfile(
         Delimeter of data values in files. Defaults to  "\t"
     include_fname : bool
         Specifies whether to set file name as first column. Defaults to True
-    dtypes : dict, optional
-        Dictionary specifying column data types. Defaults to None.
-    usecols : list, optional
-        List of column names or indices to read. Defaults to None (read all).
-
+   
     Returns
     -------
     pd.DataFrame
@@ -45,23 +39,6 @@ def read_dxfile(
         df.insert(0, "file_name", fname)
 
     return df
-
-
-def get_column_dtypes(columns: list) -> dict:
-    """
-    Filter the predefined DataFrame types against given columns.
-
-    Parameters
-    ----------
-    columns : list
-        List of columns to get dtypes for
-
-    Returns
-    -------
-    dict
-        Mapping of columns to defined dtype
-    """
-    return {column: DATAFRAME_TYPES[column] for column in columns}
 
 
 def create_pivot_table(
