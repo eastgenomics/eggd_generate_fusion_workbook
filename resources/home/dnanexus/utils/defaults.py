@@ -83,7 +83,7 @@ SF_PIVOT_CONFIG = {
         "JunctionReadCount",
         "#FusionName",
         "LeftBreakpoint",
-        "RightBreakpoint"
+        "RightBreakpoint",
     ],
     "aggfunc": {
         "#FusionName": "first",
@@ -93,16 +93,19 @@ SF_PIVOT_CONFIG = {
         "SpanningFragCount": "first",
         "JunctionReadCount": "first",
         "LeftBreakpoint": "first",
-        "RightBreakpoint": "first"
+        "RightBreakpoint": "first",
     },
     "sheet_name": "Summary",
     "tab_color": "9400D3",
     "drop_downs": {
         "Reported": {
-            "options": ["Yes", "No",],
+            "options": [
+                "Yes",
+                "No",
+            ],
             "prompt": "Choose Yes or No",
-            "title": "Fusion reported or not?"
-            },
+            "title": "Fusion reported or not?",
+        },
         "Oncogenicity": {
             "options": [
                 "Pathogenic",
@@ -110,14 +113,12 @@ SF_PIVOT_CONFIG = {
                 "VUS",
                 "Likely Benign",
                 "Benign",
-                ],
+            ],
             "prompt": "Select from the list",
-            "title": "Oncogenicity"
-            
-        }
-        
+            "title": "Oncogenicity",
+        },
     },
-    "extra_cols":{
+    "extra_cols": {
         "EPIC": "=VLOOKUP(B{row},'EPIC'!AJ:AK,2,0)",
         "DAYS COUNT": "=VLOOKUP(B{row},'EPIC'!AJ:AL,3,0)",
     },

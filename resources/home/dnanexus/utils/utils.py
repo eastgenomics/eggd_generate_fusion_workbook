@@ -11,8 +11,8 @@ from dxpy import DXDataObject
 
 
 def read_dxfile(
-    dxfile: DXDataObject, 
-    sep: str = "\t", 
+    dxfile: DXDataObject,
+    sep: str = "\t",
     include_fname: bool = True,
     dtypes: dict = None,
     usecols: list = None,
@@ -99,7 +99,7 @@ def create_pivot_table(
     )
 
     return pivot_df
-    
+
 
 def get_project_info() -> tuple[str, str]:
     """Get the project name for naming output file
@@ -119,7 +119,7 @@ def get_project_info() -> tuple[str, str]:
     return project_name, project_id
 
 
-def generate_varsome_url(breakpoint:str) -> str:
+def generate_varsome_url(breakpoint: str) -> str:
     """Generate VarSome URL from breakpoint string.
 
     Parameters
@@ -132,13 +132,13 @@ def generate_varsome_url(breakpoint:str) -> str:
     str
         Enconded Varsome URL string
     """
-    
+
     base_url = "https://varsome.com/position/hg38/"
-    
+
     # remove ':' followed by '+' or '-' only at the end
-    bp = re.sub(r'[:][+\-]$', '', breakpoint)
+    bp = re.sub(r"[:][+\-]$", "", breakpoint)
     encoded = quote(bp)
-    
+
     return f"{base_url}{encoded}"
 
 
@@ -160,6 +160,4 @@ def validate_config(config: dict, expected_keys: list):
     """
     missing_keys = [key for key in expected_keys if key not in config]
     if missing_keys:
-        raise ValueError(
-            f"Missing required config key(s): {', '.join(missing_keys)}"
-        )
+        raise ValueError(f"Missing required config key(s): {', '.join(missing_keys)}")

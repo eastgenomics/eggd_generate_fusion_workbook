@@ -1,28 +1,20 @@
 """utilities for formating summary sheet
 """
+
 import openpyxl
 import pandas as pd
-from openpyxl.styles import (
-    PatternFill,
-    Border,
-    Side, 
-    Alignment, 
-    DEFAULT_FONT,
-    Font
-)
+from openpyxl.styles import PatternFill, Border, Side, Alignment, DEFAULT_FONT, Font
 from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.worksheet.worksheet import Worksheet
 
 from .utils import generate_varsome_url
 
-DEFAULT_FONT.name = 'Calibri'
+DEFAULT_FONT.name = "Calibri"
 DEFAULT_FONT.size = 11
 
 
 def add_extra_columns(
-    worksheet: Worksheet, 
-    extra_cols: dict[str, str], 
-    start: int = 1
+    worksheet: Worksheet, extra_cols: dict[str, str], start: int = 1
 ) -> None:
     """
     Inserts additional columns with formulas at the beginning of a sheet
@@ -48,9 +40,7 @@ def add_extra_columns(
     for i, (col, formula) in enumerate(extra_cols.items(), start=start):
         worksheet.cell(row=1, column=i, value=col)
         for row in range(2, worksheet.max_row + 1):
-            worksheet.cell(
-                row=row, column=i, value=formula.replace("{row}", str(row))
-            )
+            worksheet.cell(row=row, column=i, value=formula.replace("{row}", str(row)))
 
 
 def apply_header_format(worksheet) -> None:
@@ -113,7 +103,7 @@ def set_tab_color(worksheet, hex_color: str) -> None:
         Hex colour code for the sheet tab
     """
     worksheet.sheet_properties.tabColor = hex_color
-    
+
 
 def style_borders(worksheet, style="thin"):
     """Apply style to all border of given sheet
@@ -125,10 +115,12 @@ def style_borders(worksheet, style="thin"):
     style : str, optional
         desired border style to apply, by default "thin"
     """
-    border = Border(left=Side(style=style), 
-                         right=Side(style=style),
-                         top=Side(style=style), 
-                         bottom=Side(style=style))
+    border = Border(
+        left=Side(style=style),
+        right=Side(style=style),
+        top=Side(style=style),
+        bottom=Side(style=style),
+    )
 
     for row in worksheet.iter_rows():
         for cell in row:
@@ -147,20 +139,20 @@ def highlight_specimen_borders(worksheet, df, index_col):
     index_col : str
         Column to use for grouping"
     """
-    thick_border = Border(bottom=Side(style='thick'))
-    
+    thick_border = Border(bottom=Side(style="thick"))
+
     # Find last row of each specimen group
     last_rows = df.groupby(index_col).tail(1).index
-    
+
     # Apply border to last row of each group
     for row in last_rows:
-        excel_row = row + 2 
+        excel_row = row + 2
         for col in range(1, worksheet.max_column + 1):
             worksheet.cell(row=excel_row, column=col).border = thick_border
-            
+
 
 def alternate_specimen_colors(
-    worksheet, 
+    worksheet,
     df,
     index_col,
     stop_col="FFPM",
@@ -183,35 +175,35 @@ def alternate_specimen_colors(
         Defaults 2 (when header row in at index 1)
     """
     blue_fill = PatternFill(
-        start_color='FFB4C6E7', end_color='FFB4C6E7', fill_type='solid'
+        start_color="FFB4C6E7", end_color="FFB4C6E7", fill_type="solid"
     )
     green_fill = PatternFill(
-        start_color='FFC6E0B4', end_color='FFC6E0B4', fill_type='solid'
+        start_color="FFC6E0B4", end_color="FFC6E0B4", fill_type="solid"
     )
     colors = [blue_fill, green_fill]
-    
+
     col_letter = get_col_letter(worksheet, stop_col)
     if not col_letter:
         raise ValueError(f"stop_col '{stop_col}' not found in worksheet.")
     stop_idx = openpyxl.utils.column_index_from_string(col_letter)
-    
+
     last_rows = df.groupby(index_col).tail(1).index
     current_row = start_row_idx
-    
+
     for idx, last_row in enumerate(last_rows):
         fill = colors[idx % len(colors)]
         last_row = last_row + 3
         for row in range(current_row, last_row):
             for col in range(1, stop_idx):
                 worksheet.cell(row=row, column=col).fill = fill
-        
+
         current_row = last_row
 
 
-def align_column_cells(worksheet, col_letter: str, direction: str = 'left'):
+def align_column_cells(worksheet, col_letter: str, direction: str = "left"):
     """
     Align all cells in a specified column to a given horizontal alignment.
-    
+
     Parameters
     ----------
     worksheet : openpyxl.worksheet.worksheet.Worksheet
@@ -226,7 +218,7 @@ def align_column_cells(worksheet, col_letter: str, direction: str = 'left'):
         - 'justify'
         - 'distributed'
     """
-    valid_directions = ['left', 'center', 'right', 'justify', 'distributed']
+    valid_directions = ["left", "center", "right", "justify", "distributed"]
     if direction.lower() not in valid_directions:
         raise ValueError(f"Invalid direction. Choose from: {valid_directions}")
 
@@ -242,7 +234,7 @@ def set_column_width(worksheet, col_letter: str, width: float):
     """
     Set fixed width for a specified column.
     For columns needing specific adjustment.
-    
+
     Parameters
     ----------
     worksheet : openpyxl.worksheet.worksheet.Worksheet
@@ -256,7 +248,6 @@ def set_column_width(worksheet, col_letter: str, width: float):
 
 
 def colour_hyperlinks(worksheet) -> None:
-    
     """
     Set text colour to blue if text contains hyperlink
 
@@ -267,18 +258,12 @@ def colour_hyperlinks(worksheet) -> None:
     """
     for cells in worksheet.rows:
         for cell in cells:
-            if 'HYPERLINK' in str(cell.value):
-                cell.font = Font(color='00007f', name=DEFAULT_FONT.name)
-                
-                
+            if "HYPERLINK" in str(cell.value):
+                cell.font = Font(color="00007f", name=DEFAULT_FONT.name)
+
+
 def add_drop_down_col(
-    sheet,
-    header_name,
-    dropdown_options,
-    prompt, 
-    title,
-    start=1,
-    position=None
+    sheet, header_name, dropdown_options, prompt, title, start=1, position=None
 ):
     """
     Creates a dropdown column at at the specified position.
@@ -311,7 +296,7 @@ def add_drop_down_col(
 
     # Create data validation for dropdown
     options = f'"{", ".join(dropdown_options)}"'
-    
+
     dv = DataValidation(
         type="list",
         formula1=options,
@@ -325,15 +310,15 @@ def add_drop_down_col(
     # Applly to all rows
     for row in range(start + 1, ws.max_row + 1):
         dv.add(ws[f"{col_letter}{row}"])
-        
+
     dv.showInputMessage = True
     dv.showErrorMessage = True
-    
-    # adjust column width to accommodate longest string in dropdown items 
+
+    # adjust column width to accommodate longest string in dropdown items
     col_width = max(len(x) for x in dropdown_options + [header_name])
     set_column_width(ws, col_letter, width=col_width + 2)
-    
-    
+
+
 def add_hyperlink(cell, url: str, text: str = None) -> None:
     """
     Add Excel hyperlink formula to cell
@@ -347,17 +332,15 @@ def add_hyperlink(cell, url: str, text: str = None) -> None:
     text : str
         Text to display in the cell. Defaults to the cell value.
     """
-    
+
     value = text if text else cell.value
-    
+
     if url:
         cell.value = f'=HYPERLINK("{url}", "{value}")'
-        
+
 
 def add_breakpoint_hyperlinks(
-    writer,
-    breakpoint_columns=("leftbreakpoint", "rightbreakpoint"), 
-    header_row=1
+    writer, breakpoint_columns=("leftbreakpoint", "rightbreakpoint"), header_row=1
 ):
     """
     Apply VarSome hyperlinks to breakpoint columns across all sheets in the workbook.
@@ -382,8 +365,7 @@ def add_breakpoint_hyperlinks(
             for col in range(1, max_col + 1)
         ]
         headers = [
-            col.strip().lower() if isinstance(col, str) else ""
-            for col in headers
+            col.strip().lower() if isinstance(col, str) else "" for col in headers
         ]
 
         for bp_col in breakpoint_columns:
@@ -505,13 +487,13 @@ def format_workbook(writer) -> None:
     writer : pd.ExcelWriter
     The pandas openpyxl ExcelWriter
     """
-    
+
     workbook = writer.book
-    
+
     add_breakpoint_hyperlinks(writer)
-    
+
     for sheet in workbook.worksheets:
         colour_hyperlinks(sheet)
         apply_header_format(sheet)
-        
+
         # other general formating to follow here ...

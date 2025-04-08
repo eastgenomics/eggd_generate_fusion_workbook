@@ -24,14 +24,14 @@ from utils.defaults import (
     FASTQC_PIVOT_CONFIG,
     SF_PIVOT_CONFIG,
 )
-from utils.excel import format_workbook,  write_df_to_sheet
+from utils.excel import format_workbook, write_df_to_sheet
 from utils.parser import (
     parse_fastqc,
     parse_fusion_inspector,
     parse_star_fusion,
     make_fastqc_pivot,
     make_sf_pivot,
-    parse_sf_previous
+    parse_sf_previous,
 )
 from utils.summary_sheet import write_summary
 from utils.utils import (
@@ -107,11 +107,7 @@ def main(
             df_fusioninspector,
             SF_PIVOT_CONFIG,
         )
-        write_summary(
-            writer,
-            sf_pivot,
-            SF_PIVOT_CONFIG
-        )
+        write_summary(writer, sf_pivot, SF_PIVOT_CONFIG)
         format_workbook(writer)
 
     fusion_workbook = dxpy.upload_local_file(outfile)
