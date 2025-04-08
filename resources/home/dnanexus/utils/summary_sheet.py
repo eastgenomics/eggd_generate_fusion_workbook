@@ -57,7 +57,7 @@ def add_databar_to_ffpm(
             start_value=0,
             end_type="num",
             end_value=max_ffpm,
-            color="0000FF00",
+            color="FFC854",
             showValue=True,
         )
         worksheet.conditional_formatting.add(cell_range, rule)

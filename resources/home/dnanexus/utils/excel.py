@@ -143,7 +143,12 @@ def highlight_specimen_borders(
     index_col : str
         Column to use for grouping"
     """
-    thick_border = Border(bottom=Side(style="thick"))
+    thick_border = Border(
+        left=Side(style="thin"),
+        right=Side(style="thin"),
+        top=Side(style="thin"),
+        bottom=Side(style="thick")
+    )
 
     # Find last row of each specimen group
     last_rows = df.groupby(index_col).tail(1).index
