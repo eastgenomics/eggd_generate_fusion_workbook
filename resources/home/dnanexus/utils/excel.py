@@ -300,7 +300,7 @@ def add_drop_down_col(
     dv = DataValidation(
         type="list",
         formula1=options,
-        showDropDown=True,
+        showDropDown=False,
         allow_blank=True,
     )
     dv.prompt = prompt
