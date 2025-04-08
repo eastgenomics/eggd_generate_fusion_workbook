@@ -12,7 +12,7 @@ from dxpy import DXDataObject
 from .utils import create_pivot_table, read_dxfile
 
 
-def parse_specimen_id(sample:str) -> str:
+def parse_specimen_id(sample: str) -> str:
     """parse SP ID from sample name
 
     Parameters
@@ -28,7 +28,7 @@ def parse_specimen_id(sample:str) -> str:
     return sample.split("-")[1]
 
 
-def parse_igv_specimen_name(sample:str) -> str:
+def parse_igv_specimen_name(sample: str) -> str:
     """parse SP ID from sample name in IGV format
 
     Parameters
@@ -42,6 +42,26 @@ def parse_igv_specimen_name(sample:str) -> str:
         extracted SP eg 12345678-2XXXXSXXX-25PCAN4
     """
     return "-".join(sample.split("-")[:3])
+
+
+def parse_sf_previous(dxfile: DXDataObject) -> pd.DataFrame:
+    """Parse the content of sf_previous_run_data file
+
+    Parameters
+    ----------
+    dxfile : DXDataObject
+        DNAnexus file object containing data to parse
+
+    Returns
+    -------
+    pd.DataFrame
+        pandas dataframe containing selected columns
+    """
+
+    df = read_dxfile(dxfile, include_fname=False)
+    df = df[["#FusionName", "Count_Run_1_Run_20_predicted"]]
+
+    return df
 
 
 def parse_fastqc(dxfile: DXDataObject) -> pd.DataFrame:
@@ -138,15 +158,15 @@ def _parse_fusion_files(dxfiles: List[DXDataObject]) -> pd.DataFrame:
         futures = [executor.submit(read_dxfile, dxfile) for dxfile in dxfiles]
         results = []
         for future in futures:
-           try:
+            try:
                 results.append(future.result())
-           except Exception as e:
-               # Log the error and continue with other files
-              print(f"Error processing file: {e}")
-        
+            except Exception as e:
+                # Log the error and continue with other files
+                print(f"Error processing file: {e}")
+
         if not results:
-           return pd.DataFrame()
-        
+            return pd.DataFrame()
+
         df = pd.concat(results)
 
     return df
@@ -251,11 +271,14 @@ def make_sf_pivot(
         ).rename(columns={"PROT_FUSION_TYPE": "FRAME"})
 
     # Create final pivot table
-    df = df.sort_values(by=["SPECIMEN", "FFPM"]).reset_index(drop=True)
+    df = df.sort_values(by=["FFPM"]).reset_index(drop=True)
+
     pivot_df = create_pivot_table(df, pivot_config)
     pivot_df = pivot_df[
         [
-            "LEFTRIGHT",
+            "LeftBreakpoint",
+            "#FusionName",
+            "RightBreakpoint",
             "JunctionReadCount",
             "SpanningFragCount",
             "Count_predicted",
