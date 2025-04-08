@@ -43,7 +43,7 @@ def add_extra_columns(
             worksheet.cell(row=row, column=i, value=formula.replace("{row}", str(row)))
 
 
-def apply_header_format(worksheet) -> None:
+def apply_header_format(worksheet: Worksheet) -> None:
     """
     Applies bold formatting to all headers in the sheet.
 
@@ -62,7 +62,9 @@ def apply_header_format(worksheet) -> None:
         cell.font = header_font
 
 
-def adjust_column_widths(worksheet, min_width=14, max_width=40):
+def adjust_column_widths(
+    worksheet: Worksheet, min_width: int = 14, max_width: int = 40
+) -> None:
     """
     Adjusts all column widths in given sheet for better visibility.
 
@@ -92,7 +94,7 @@ def adjust_column_widths(worksheet, min_width=14, max_width=40):
         worksheet.column_dimensions[col_letter].width = min(_max + 2, max_width)
 
 
-def set_tab_color(worksheet, hex_color: str) -> None:
+def set_tab_color(worksheet: Worksheet, hex_color: str) -> None:
     """Sets worksheet tab colour
 
     Parameters
@@ -105,7 +107,7 @@ def set_tab_color(worksheet, hex_color: str) -> None:
     worksheet.sheet_properties.tabColor = hex_color
 
 
-def style_borders(worksheet, style="thin"):
+def style_borders(worksheet: Worksheet, style: str = "thin") -> None:
     """Apply style to all border of given sheet
 
     Parameters
@@ -127,7 +129,9 @@ def style_borders(worksheet, style="thin"):
             cell.border = border
 
 
-def highlight_specimen_borders(worksheet, df, index_col):
+def highlight_specimen_borders(
+    worksheet: Worksheet, df: pd.DataFrame, index_col: str
+) -> None:
     """Adds thick borders between specimen groups.
 
     Parameters
@@ -152,12 +156,12 @@ def highlight_specimen_borders(worksheet, df, index_col):
 
 
 def alternate_specimen_colors(
-    worksheet,
-    df,
-    index_col,
-    stop_col="FFPM",
-    start_row_idx=2,
-):
+    worksheet: Worksheet,
+    df: pd.DataFrame,
+    index_col: str,
+    stop_col: str = "FFPM",
+    start_row_idx: int = 2,
+) -> None:
     """Apply alternate row colors between specimen groups in summary sheet.
 
     Parameters
@@ -192,7 +196,7 @@ def alternate_specimen_colors(
 
     for idx, last_row in enumerate(last_rows):
         fill = colors[idx % len(colors)]
-        last_row = last_row + 3
+        last_row = last_row + start_row_idx + 1
         for row in range(current_row, last_row):
             for col in range(1, stop_idx):
                 worksheet.cell(row=row, column=col).fill = fill
@@ -200,7 +204,9 @@ def alternate_specimen_colors(
         current_row = last_row
 
 
-def align_column_cells(worksheet, col_letter: str, direction: str = "left"):
+def align_column_cells(
+    worksheet: Worksheet, col_letter: str, direction: str = "left"
+) -> None:
     """
     Align all cells in a specified column to a given horizontal alignment.
 
@@ -230,7 +236,7 @@ def align_column_cells(worksheet, col_letter: str, direction: str = "left"):
             cell.alignment = alignment
 
 
-def set_column_width(worksheet, col_letter: str, width: float):
+def set_column_width(worksheet: Worksheet, col_letter: str, width: float) -> None:
     """
     Set fixed width for a specified column.
     For columns needing specific adjustment.
@@ -247,7 +253,7 @@ def set_column_width(worksheet, col_letter: str, width: float):
     worksheet.column_dimensions[col_letter].width = width
 
 
-def colour_hyperlinks(worksheet) -> None:
+def colour_hyperlinks(worksheet: Worksheet) -> None:
     """
     Set text colour to blue if text contains hyperlink
 
@@ -263,8 +269,14 @@ def colour_hyperlinks(worksheet) -> None:
 
 
 def add_drop_down_col(
-    sheet, header_name, dropdown_options, prompt, title, start=1, position=None
-):
+    sheet: Worksheet,
+    header_name: str,
+    dropdown_options: list[str],
+    prompt: str,
+    title: str,
+    start: int = 1,
+    position: int | None = None,
+) -> None:
     """
     Creates a dropdown column at at the specified position.
 
@@ -295,7 +307,7 @@ def add_drop_down_col(
     ws[f"{col_letter}{start}"] = header_name
 
     # Create data validation for dropdown
-    options = f'"{", ".join(dropdown_options)}"'
+    options = f'"{",".join(dropdown_options)}"'
 
     dv = DataValidation(
         type="list",
@@ -319,7 +331,7 @@ def add_drop_down_col(
     set_column_width(ws, col_letter, width=col_width + 2)
 
 
-def add_hyperlink(cell, url: str, text: str = None) -> None:
+def add_hyperlink(cell: openpyxl.cell.cell.Cell, url: str, text: str = None) -> None:
     """
     Add Excel hyperlink formula to cell
 
@@ -340,8 +352,10 @@ def add_hyperlink(cell, url: str, text: str = None) -> None:
 
 
 def add_breakpoint_hyperlinks(
-    writer, breakpoint_columns=("leftbreakpoint", "rightbreakpoint"), header_row=1
-):
+    writer: pd.ExcelWriter,
+    breakpoint_columns: tuple[str, str] = ("leftbreakpoint", "rightbreakpoint"),
+    header_row: int = 1,
+) -> None:
     """
     Apply VarSome hyperlinks to breakpoint columns across all sheets in the workbook.
 
@@ -349,7 +363,7 @@ def add_breakpoint_hyperlinks(
     ----------
     writer : pd.ExcelWriter
         The pandas openpyxl ExcelWriter
-    breakpoint_columns : tuple
+    breakpoint_columns : tuple[str, str]
         Column names to check for breakpoints.
     header_row : int
         Row number where headers are located (1-based).
@@ -388,7 +402,7 @@ def add_breakpoint_hyperlinks(
                         )
 
 
-def get_col_letter(worksheet, col_name) -> str:
+def get_col_letter(worksheet: Worksheet, col_name: str) -> str:
     """
     Getting the column letter with specific col name
 
@@ -411,7 +425,7 @@ def get_col_letter(worksheet, col_name) -> str:
     return col_letter
 
 
-def drop_column(worksheet, col_name: str) -> bool:
+def drop_column(worksheet: Worksheet, col_name: str) -> bool:
     """
     Deletes a column from the worksheet given a column name
 
@@ -479,7 +493,7 @@ def write_df_to_sheet(
     adjust_column_widths(worksheet)
 
 
-def format_workbook(writer) -> None:
+def format_workbook(writer: pd.ExcelWriter) -> None:
     """apply formatting to entire workbook
 
     Parameters

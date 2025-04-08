@@ -4,6 +4,7 @@
 import openpyxl
 import pandas as pd
 from openpyxl.styles import PatternFill, Border, Side, Alignment
+from openpyxl.worksheet.worksheet import Worksheet
 
 from .excel import (
     alternate_specimen_colors,
@@ -19,7 +20,9 @@ from .excel import (
 from .utils import validate_config
 
 
-def add_databar_to_ffpm(worksheet, df, ffpm_col, index_col):
+def add_databar_to_ffpm(
+    worksheet: Worksheet, df: pd.DataFrame, ffpm_col: str, index_col: int
+) -> None:
     """
     Conditionally add databar to FFPM col (groupby specimen).
 
@@ -64,7 +67,9 @@ def add_databar_to_ffpm(worksheet, df, ffpm_col, index_col):
     align_column_cells(worksheet, col_letter)
 
 
-def add_lookup_columns(worksheet, cols: dict, specimen_col: str = "B"):
+def add_lookup_columns(
+    worksheet: Worksheet, cols: dict, specimen_col: str = "B"
+) -> None:
     """
     Adds formula columns while preserving merged specimen structure
 
@@ -105,9 +110,7 @@ def add_lookup_columns(worksheet, cols: dict, specimen_col: str = "B"):
             worksheet.merge_cells(f"{new_col}{start}:{new_col}{end}")
 
             # Apply formula to first cell
-            formula = formula_template.replace(
-                "{row}", str(start)
-            )
+            formula = formula_template.replace("{row}", str(start))
             new_cell = worksheet.cell(row=start, column=new_col_idx, value=formula)
             new_cell.alignment = Alignment(vertical="top")
 
@@ -117,7 +120,10 @@ def add_lookup_columns(worksheet, cols: dict, specimen_col: str = "B"):
 
 
 def format_summary_sheet(
-    worksheet, source_df, ffpm_col="FFPM", index_col="SPECIMEN"
+    worksheet: Worksheet,
+    source_df: pd.DataFrame,
+    ffpm_col: str = "FFPM",
+    index_col: str = "SPECIMEN",
 ) -> None:
     """
     Conditionally formats summary sheet rows per specimen.
@@ -126,7 +132,7 @@ def format_summary_sheet(
     ----------
     worksheet : Worksheet
         The worksheet where conditional formatting will be applied
-    source_df : pandas.DataFrame
+    source_df : pd.DataFrame
         The source data written to sheet
     ffpm_col : str, optional
         Name of the FFPM column in the DataFrame, default is "FFPM"
