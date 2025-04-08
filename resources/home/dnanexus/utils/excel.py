@@ -147,7 +147,7 @@ def highlight_specimen_borders(
         left=Side(style="thin"),
         right=Side(style="thin"),
         top=Side(style="thin"),
-        bottom=Side(style="thick")
+        bottom=Side(style="thick"),
     )
 
     # Find last row of each specimen group
@@ -455,6 +455,26 @@ def drop_column(worksheet: Worksheet, col_name: str) -> bool:
     worksheet.delete_cols(col_index)
     print(f"Deleted column '{col_name}' (column {col_letter}).")
     return True
+
+
+def rotate_headers(sheet: Worksheet, header_row: int = 1, degree: int = 90) -> None:
+    """Rotates values in header row by given degree (90 -- vertically).
+
+    Parameters
+    ----------
+    sheet : Worksheet
+        The sheet where headers will be rotated.
+    header_row : int, optional
+        The row index containing headers (1-based), by default 1
+    degree : int, optional
+        The degree of rotation to apply (0-180), by default 90
+    """
+    alignment = Alignment(textRotation=degree, vertical="bottom", horizontal="center")
+    for col in range(1, sheet.max_column + 1):
+        cell = sheet.cell(row=header_row, column=col)
+        cell.alignment = alignment
+
+    sheet.row_dimensions[header_row].height = 125
 
 
 def write_df_to_sheet(

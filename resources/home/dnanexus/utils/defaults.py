@@ -122,4 +122,5 @@ SF_PIVOT_CONFIG = {
         "EPIC": "=VLOOKUP(B{row},'EPIC'!AJ:AK,2,0)",
         "DAYS COUNT": "=VLOOKUP(B{row},'EPIC'!AJ:AL,3,0)",
     },
+    "col_widths": {"D": 6, "E": 10, "F": 10, "J": 6, "K": 6, "L": 6},
 }

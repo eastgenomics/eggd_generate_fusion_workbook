@@ -16,6 +16,7 @@ from .excel import (
     get_col_letter,
     write_df_to_sheet,
     drop_column,
+    rotate_headers,
 )
 from .utils import validate_config
 
@@ -122,6 +123,7 @@ def add_lookup_columns(
 def format_summary_sheet(
     worksheet: Worksheet,
     source_df: pd.DataFrame,
+    col_widths: dict,
     ffpm_col: str = "FFPM",
     index_col: str = "SPECIMEN",
 ) -> None:
@@ -134,6 +136,8 @@ def format_summary_sheet(
         The worksheet where conditional formatting will be applied
     source_df : pd.DataFrame
         The source data written to sheet
+    col_widths : dict
+        Mapping of col letter to a fix width size
     ffpm_col : str, optional
         Name of the FFPM column in the DataFrame, default is "FFPM"
     index_col : str, optional
@@ -152,6 +156,10 @@ def format_summary_sheet(
     add_databar_to_ffpm(worksheet, df, ffpm_col, index_col)
     alternate_specimen_colors(worksheet, df, index_col)
     highlight_specimen_borders(worksheet, df, index_col)
+    rotate_headers(worksheet)
+
+    for col, width in col_widths.items():
+        set_column_width(worksheet, col, width)
 
 
 def write_summary(
@@ -169,12 +177,19 @@ def write_summary(
     config : dict
         Config specifing styling and formating of sheet
     """
-    expected_keys = ["sheet_name", "tab_color", "extra_cols", "drop_downs"]
+    expected_keys = [
+        "sheet_name",
+        "tab_color",
+        "extra_cols",
+        "drop_downs",
+        "col_widths",
+    ]
     validate_config(config, expected_keys)
 
     sheet_name = config["sheet_name"]
     tab_color = config["tab_color"]
     lookup_cols = config["extra_cols"]
+    col_widths = config["col_widths"]
 
     write_df_to_sheet(
         writer,
@@ -199,4 +214,4 @@ def write_summary(
             prompt=prompt,
             title=title,
         )
-    format_summary_sheet(summary_sheet, data)
+    format_summary_sheet(summary_sheet, data, col_widths)

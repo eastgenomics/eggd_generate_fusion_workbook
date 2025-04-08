@@ -25,7 +25,7 @@ def read_dxfile(
         Delimeter of data values in files. Defaults to  "\t"
     include_fname : bool
         Specifies whether to set file name as first column. Defaults to True
-   
+
     Returns
     -------
     pd.DataFrame
