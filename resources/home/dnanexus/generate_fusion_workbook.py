@@ -97,6 +97,8 @@ def main(
             sheet_name=FASTQC_PIVOT_CONFIG["sheet_name"],
             tab_color=FASTQC_PIVOT_CONFIG["tab_color"],
         )
+        # Add Fusion Inspector data
+        write_df_to_sheet(writer, df_fusioninspector, **FI_SHEET_CONFIG)
 
         # Add STAR-Fusion data
         write_df_to_sheet(writer, df_starfusion, **SF_SHEET_CONFIG)

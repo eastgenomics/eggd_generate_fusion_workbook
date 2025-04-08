@@ -107,7 +107,7 @@ def add_lookup_columns(worksheet, cols: dict, specimen_col: str = "B"):
             # Apply formula to first cell
             formula = formula_template.replace(
                 "{row}", str(start)
-            )  # .replace(specimen_col, spec_cell)
+            )
             new_cell = worksheet.cell(row=start, column=new_col_idx, value=formula)
             new_cell.alignment = Alignment(vertical="top")
 
