@@ -424,7 +424,7 @@ def get_col_letter(worksheet: Worksheet, col_name: str) -> str:
     """
     col_letter = None
     for column_cell in worksheet.iter_cols(1, worksheet.max_column):
-        if column_cell[0].value == col_name:
+        if column_cell[0].value.strip() == col_name:
             col_letter = column_cell[0].column_letter
 
     return col_letter
@@ -473,8 +473,9 @@ def rotate_headers(sheet: Worksheet, header_row: int = 1, degree: int = 90) -> N
     for col in range(1, sheet.max_column + 1):
         cell = sheet.cell(row=header_row, column=col)
         cell.alignment = alignment
+        cell.value = f" {cell.value}"
 
-    sheet.row_dimensions[header_row].height = 125
+    sheet.row_dimensions[header_row].height = 130
 
 
 def write_df_to_sheet(
