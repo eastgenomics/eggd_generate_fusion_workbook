@@ -59,7 +59,13 @@ def parse_sf_previous(dxfile: DXDataObject) -> pd.DataFrame:
     """
 
     df = read_dxfile(dxfile, include_fname=False)
-    df = df[["#FusionName", "Count_Run_1_Run_20_predicted"]]
+    df = (
+        df[["#FusionName", "Count_Run_1_Run_20_predicted"]]
+        .rename(columns={"Count_Run_1_Run_20_predicted": "Count_predicted"})
+        .drop_duplicates()
+        .sort_values(by="#FusionName")
+        .reset_index(drop=True)
+    )
 
     return df
 
@@ -253,10 +259,10 @@ def make_sf_pivot(
     # Merge previous runs data (VLOOKUP equivalent)
     if not sf_runs_df.empty:
         df = df.merge(
-            sf_runs_df[["#FusionName", "Count_Run_1_Run_20_predicted"]],
+            sf_runs_df[["#FusionName", "Count_predicted"]],
             on="#FusionName",
             how="left",
-        ).rename(columns={"Count_Run_1_Run_20_predicted": "Count_predicted"})
+        )
         df["Count_predicted"] = df["Count_predicted"].fillna(0).astype(int)
 
     # Merge FastQC metrics (VLOOKUP to FastQC_pivot)
