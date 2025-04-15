@@ -138,3 +138,32 @@ def validate_config(config: dict, expected_keys: list):
     missing_keys = [key for key in expected_keys if key not in config]
     if missing_keys:
         raise ValueError(f"Missing required config key(s): {', '.join(missing_keys)}")
+ 
+
+def get_dxfile(files: list[dxpy.DXDataObject], target_name: str) -> dxpy.DXDataObject:
+    """Finds a DXDataObject in the given list that matches the specified filename.
+
+    Parameters
+    ----------
+    files : list[dxpy.DXDataObject]
+        List of DNAnexus data objects (e.g., DXFile instances)
+    target_name : str
+        The exact file name to search for (case-sensitive match).
+
+    Returns
+    -------
+    dxpy.DXDataObject
+        The first DXDataObject with a .name attribute matching `target_name`.
+
+    Raises
+    ------
+    ValueError
+        If no file with the specified name is found in the list.
+    """
+    
+    try:
+        return next(f for f in files if f.name == target_name)
+    except StopIteration:
+        raise ValueError(
+            f"{target_name} not found in input array"
+        )

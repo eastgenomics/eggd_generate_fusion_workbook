@@ -193,9 +193,17 @@ def parse_fusion_inspector(dxfiles: List[DXDataObject]) -> pd.DataFrame:
         A concatenated DataFrame containing the combined data
         from all input files.
     """
-    # simply calls _parse_fusion_files for now
-    # can be easily extended if additional logic needed for tool
-    return _parse_fusion_files(dxfiles)
+    df = _parse_fusion_files(dxfiles)
+    df["file_name"] = (
+        df["file_name"].str.split("_").str[0] +
+        "_FusionInspector.fusions.abridged.merged.tsv"
+    )
+    df = (
+        df.sort_values(by=["JunctionReadCount", "SpanningFragCount"])
+        .drop_duplicates()
+        .reset_index(drop=True)
+    )
+    return df
 
 
 def parse_star_fusion(dxfiles: List[DXDataObject]) -> pd.DataFrame:

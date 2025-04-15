@@ -37,6 +37,7 @@ from utils.summary_sheet import write_summary
 from utils.utils import (
     get_project_info,
     read_dxfile,
+    get_dxfile,
 )
 
 
@@ -44,7 +45,7 @@ from utils.utils import (
 def main(
     starfusion_files: List[dict],
     fusioninspector_files: List[dict],
-    fastqc_data: dict,
+    multiqc_files: List[dict],
     SF_previous_runs_data: dict,
 ):
     """Generates a fusion workbook with data from
@@ -56,8 +57,8 @@ def main(
         List of dictionaries containing DXLinks to STAR-Fusion output files
     fusioninspector_files : List[dict]
         List of dictionaries containing DXLinks to FusionInspector output files
-    fastqc_data : dict
-        Mapping of DXLink to FastQC data file
+    multiqc_files : List[dict]
+        List of dictionaries containing DXLinks to MultiQC output files
     SF_previous_runs_data : str
        Mapping of DXLink to STAR-Fusion previous runs data file
 
@@ -69,7 +70,8 @@ def main(
     # Initialize inputs into dxpy.DXDataObject instances
     starfusion_files = [dxpy.DXFile(item) for item in starfusion_files]
     fusioninspector_files = [dxpy.DXFile(item) for item in fusioninspector_files]
-    fastqc_data = dxpy.DXFile(fastqc_data)
+    multiqc_files = [dxpy.DXFile(item) for item in multiqc_files]
+    fastqc_data = get_dxfile(multiqc_files, "multiqc_fastqc.txt")
     sf_previous_data = dxpy.DXFile(SF_previous_runs_data)
 
     df_starfusion = parse_star_fusion(starfusion_files)

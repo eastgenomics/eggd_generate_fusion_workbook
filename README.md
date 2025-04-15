@@ -6,7 +6,7 @@ Collates Fusion candidates and associated metadata from STAR-Fusion, FusionInspe
 ## What inputs are required for this app to run?
 - `-istarfusion_files` : An array of DNAnexus file IDs of STAR-Fusion's prediction files
 - `-ifusioninspector_files` : An array of DNAnexus file IDs of FusionInspector's output files
-- `-ifastqc_data`: The DNAnexus file ID of FASTQC metrics file
+- `-imultiqc_files`: An array of DNAnexus file IDs of MultiQC output metrics file
 - `-iSF_previous_runs_data` : The DNAnexus file ID of a static file containing historical STAR-Fusion data
 
 ## How does this app work?

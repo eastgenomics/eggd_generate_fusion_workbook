@@ -20,11 +20,11 @@
         "help": "FusionInspector output files for validation of fusions"
       },
       {
-        "name": "fastqc_data",
-        "label": "fastqc_data",
-        "class": "file",
+        "name": "multiqc_files",
+        "label": "multiqc_files",
+        "class": "array:file",
         "optional": false,
-        "help": "FastQC output file containing quality metrics for the sequencing data"
+        "help": "MultiQC output files containing quality metrics for the sequencing data"
       },
       {
         "name": "SF_previous_runs_data",
