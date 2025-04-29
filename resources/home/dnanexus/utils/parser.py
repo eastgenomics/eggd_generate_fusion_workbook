@@ -225,11 +225,32 @@ def parse_star_fusion(dxfiles: List[DXDataObject]) -> pd.DataFrame:
     return _parse_fusion_files(dxfiles)
 
 
+def parse_prev_pos(dxfile: DXDataObject) -> pd.DataFrame:
+    """Parse the content of previous_positives data and modify Fusion column
+
+    Parameters
+    ----------
+    dxfile : DXDataObject
+        DNAnexus file object containing previous_positives data
+
+    Returns
+    -------
+    pd.DataFrame
+        pandas dataframe containing modified data
+
+    """
+    df = read_dxfile(dxfile, sep=",", include_fname=False)
+    df["Fusion"] = df["Fusion"].str.replace("::", "--", regex=False)
+    return df
+
+
 def make_sf_pivot(
     sf_df: pd.DataFrame,
     sf_runs_df: pd.DataFrame,
     fastqc_pivot_df: pd.DataFrame,
     fi_df: pd.DataFrame,
+    prev_pos: pd.DataFrame,
+    ref_sources: pd.DataFrame,
     pivot_config: dict,
 ) -> pd.DataFrame:
     """Generates STAR-Fusion pivot table with merged data
@@ -244,6 +265,10 @@ def make_sf_pivot(
         FastQC summary data
     fi_df : pd.DataFrame
         Current Fusion Inspector data
+    prev_pos : pd.DataFrame
+        Previously reported Fusions
+    ref_sources : pd.DataFrame
+        Reference source of Fusions
     pivot_config : dict
         Pivot configuration parameters
 
@@ -283,11 +308,30 @@ def make_sf_pivot(
         df = df.merge(
             fi_df[["LEFTRIGHT", "PROT_FUSION_TYPE"]], on="LEFTRIGHT", how="left"
         ).rename(columns={"PROT_FUSION_TYPE": "FRAME"})
+        
+    
+    # add prev positives
+    prev_pos_agg = (
+        prev_pos.groupby("Fusion")["Specimen ID"]
+        .apply(lambda x: ",".join(sorted(x)))
+        .reset_index()
+        .rename(columns={"Fusion": "#FusionName", "Specimen ID": "PreviousPositives"})
+    )
+    df = df.merge(prev_pos_agg, on="#FusionName", how="left")
+    df["PreviousPositives"] = df["PreviousPositives"].fillna("NO")
+    
+    # add ref sources
+    df = df.merge(
+        ref_sources.rename(columns={"Fusion": "#FusionName"}),
+        on="#FusionName",
+        how="left"
+    )
+    df["ReferenceSources"] = df["ReferenceSources"].fillna("")
 
     # Create final pivot table
     df = df.sort_values(by=["FFPM"]).reset_index(drop=True)
-
     pivot_df = create_pivot_table(df, pivot_config)
+    
     pivot_df = pivot_df[
         [
             "LeftBreakpoint",
@@ -296,6 +340,8 @@ def make_sf_pivot(
             "JunctionReadCount",
             "SpanningFragCount",
             "Count_predicted",
+            "ReferenceSources",
+            "PreviousPositives",
             "FRAME",
             "FFPM",
         ]

@@ -52,6 +52,18 @@ EPIC_SHEET_CONFIG = {
     "extra_cols": None,
 }
 
+REF_SOURCES_SHEET_CONFIG = {
+    "sheet_name": "ReferenceSources",
+    "tab_color": "17171A",
+    "extra_cols": None,
+}
+
+PREV_POS_SHEET_CONFIG = {
+    "sheet_name": "PreviousPositives",
+    "tab_color": "17171A",
+    "extra_cols": None,
+}
+
 
 FASTQC_PIVOT_CONFIG = {
     "index": ["SPECIMEN"],
@@ -84,6 +96,8 @@ SF_PIVOT_CONFIG = {
         "#FusionName",
         "LeftBreakpoint",
         "RightBreakpoint",
+        "ReferenceSources",
+        "PreviousPositives",
     ],
     "aggfunc": {
         "#FusionName": "first",
@@ -94,6 +108,8 @@ SF_PIVOT_CONFIG = {
         "JunctionReadCount": "first",
         "LeftBreakpoint": "first",
         "RightBreakpoint": "first",
+        "ReferenceSources": "first",
+        "PreviousPositives": "first",
     },
     "sheet_name": "Summary",
     "tab_color": "CFBF30",

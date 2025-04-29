@@ -31,6 +31,18 @@
         "class": "file",
         "optional": false,
         "help": "File containing info of STAR-Fusion's predictons from previous runs"
+      },
+      {
+        "name": "reference_sources",
+        "class": "file",
+        "optional": false,
+        "help": "File containing aggregated data source from COSMIC, FusionDGB2 and ChimerDB"
+      },
+      {
+        "name": "previous_positives",
+        "class": "file",
+        "optional": false,
+        "help": "File containing previously reported fusions"
       }
     ],
     "outputSpec": [
@@ -56,8 +68,10 @@
       "release": "24.04",
       "version": "0"
     },
+    "openSource": true,
     "access": {
-      "project": "CONTRIBUTE"
+      "project": "CONTRIBUTE",
+      "allProjects": "CONTRIBUTE"
     },
     "regionalOptions": {
       "aws:eu-central-1": {

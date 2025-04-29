@@ -8,6 +8,8 @@ Collates Fusion candidates and associated metadata from STAR-Fusion, FusionInspe
 - `-ifusioninspector_files` : An array of DNAnexus file IDs of FusionInspector's output files
 - `-imultiqc_files`: An array of DNAnexus file IDs of MultiQC output metrics file
 - `-iSF_previous_runs_data` : The DNAnexus file ID of a static file containing historical STAR-Fusion data
+- `ireference_sources` : The DNAnexus file ID of a static file containing aggregated data source from COSMIC, FusionDGB2 and ChimerDB
+- `iprevious_positives`: The DNAnexus file ID of a static file containing previously reported fusions
 
 ## How does this app work?
 - Parses all inputs and format data according to structure of source data
