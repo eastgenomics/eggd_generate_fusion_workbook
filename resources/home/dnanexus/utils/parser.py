@@ -195,8 +195,8 @@ def parse_fusion_inspector(dxfiles: List[DXDataObject]) -> pd.DataFrame:
     """
     df = _parse_fusion_files(dxfiles)
     df["file_name"] = (
-        df["file_name"].str.split("_").str[0] +
-        "_FusionInspector.fusions.abridged.merged.tsv"
+        df["file_name"].str.split("_").str[0]
+        + "_FusionInspector.fusions.abridged.merged.tsv"
     )
     df = (
         df.sort_values(by=["JunctionReadCount", "SpanningFragCount"])
@@ -308,8 +308,7 @@ def make_sf_pivot(
         df = df.merge(
             fi_df[["LEFTRIGHT", "PROT_FUSION_TYPE"]], on="LEFTRIGHT", how="left"
         ).rename(columns={"PROT_FUSION_TYPE": "FRAME"})
-        
-    
+
     # add prev positives
     prev_pos_agg = (
         prev_pos.groupby("Fusion")["Specimen ID"]
@@ -318,20 +317,20 @@ def make_sf_pivot(
         .rename(columns={"Fusion": "#FusionName", "Specimen ID": "PreviousPositives"})
     )
     df = df.merge(prev_pos_agg, on="#FusionName", how="left")
-    df["PreviousPositives"] = df["PreviousPositives"].fillna("NO")
-    
+    df["PreviousPositives"] = df["PreviousPositives"].fillna("")
+
     # add ref sources
     df = df.merge(
         ref_sources.rename(columns={"Fusion": "#FusionName"}),
         on="#FusionName",
-        how="left"
+        how="left",
     )
     df["ReferenceSources"] = df["ReferenceSources"].fillna("")
 
     # Create final pivot table
     df = df.sort_values(by=["FFPM"]).reset_index(drop=True)
     pivot_df = create_pivot_table(df, pivot_config)
-    
+
     pivot_df = pivot_df[
         [
             "LeftBreakpoint",

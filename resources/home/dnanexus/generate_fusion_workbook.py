@@ -34,7 +34,7 @@ from utils.parser import (
     make_fastqc_pivot,
     make_sf_pivot,
     parse_sf_previous,
-    parse_prev_pos
+    parse_prev_pos,
 )
 from utils.summary_sheet import write_summary
 from utils.utils import (
@@ -51,7 +51,7 @@ def main(
     multiqc_files: List[dict],
     SF_previous_runs_data: dict,
     reference_sources: dict,
-    previous_positives: dict
+    previous_positives: dict,
 ):
     """Generates a fusion workbook with data from
     STAR-Fusion, FusionInspector, and FastQC
@@ -99,10 +99,10 @@ def main(
 
         # Writes empty EPIC sheet
         write_df_to_sheet(writer, pd.DataFrame(), **EPIC_SHEET_CONFIG)
-        
+
         # Writes RefSources sheet
         write_df_to_sheet(writer, df_ref_sources, **REF_SOURCES_SHEET_CONFIG)
-        
+
         # Writes PreviousPositives sheet
         write_df_to_sheet(writer, df_prev_pos, **PREV_POS_SHEET_CONFIG)
 
