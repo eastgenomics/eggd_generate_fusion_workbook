@@ -6,6 +6,8 @@ Collates Fusion candidates and associated metadata from STAR-Fusion, FusionInspe
 ## What inputs are required for this app to run?
 - `-istarfusion_files` : An array of DNAnexus file IDs of STAR-Fusion's prediction files
 - `-ifusioninspector_files` : An array of DNAnexus file IDs of FusionInspector's output files
+- `-fi_testdir_cosmic_files` : (optional) An array of DNAnexus file IDs of FusionInspector's output (testdir_cosmic) files
+- `-ifi_rna_opa_files` : (optional) An array of DNAnexus file IDs of FusionInspector's output (rna_opa) files
 - `-imultiqc_files`: An array of DNAnexus file IDs of MultiQC output metrics file
 - `-iSF_previous_runs_data` : The DNAnexus file ID of a static file containing historical STAR-Fusion data
 - `ireference_sources` : The DNAnexus file ID of a static file containing aggregated data source from COSMIC, FusionDGB2 and ChimerDB
@@ -21,5 +23,5 @@ Collates Fusion candidates and associated metadata from STAR-Fusion, FusionInspe
 
 #### TODO
 - Add unit tests
-- optimise reading of large dx files
-- add more validations to parser module
+- Add scripts to generate static inputs
+- Add more validations to parser module

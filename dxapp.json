@@ -20,6 +20,20 @@
         "help": "FusionInspector output files for validation of fusions"
       },
       {
+        "name": "fi_testdir_cosmic_files",
+        "label": "fi_testdir_cosmic_files",
+        "class": "array:file",
+        "optional": true,
+        "help": "FusionInspector output (testdir_cosmic) files for validation of fusions"
+      },
+      {
+        "name": "fi_rna_opa_files",
+        "label": "fi_rna_opa_files",
+        "class": "array:file",
+        "optional": true,
+        "help": "FusionInspector output (rna_opa) files for validation of fusions"
+      },
+      {
         "name": "multiqc_files",
         "label": "multiqc_files",
         "class": "array:file",

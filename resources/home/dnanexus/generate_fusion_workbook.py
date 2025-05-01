@@ -52,6 +52,8 @@ def main(
     SF_previous_runs_data: dict,
     reference_sources: dict,
     previous_positives: dict,
+    fi_testdir_cosmic_files: List[dict] | None = None,
+    fi_rna_opa_files: List[dict] | None = None,
 ):
     """Generates a fusion workbook with data from
     STAR-Fusion, FusionInspector, and FastQC
@@ -70,6 +72,12 @@ def main(
        Mapping of DXLink to ReferenceSources file
     previous_positives : dict
        Mapping of DXLink to PreviousPositives file
+    fi_testdir_cosmic_files : List[dict]|None
+        List of dictionaries containing DXLinks to FusionInspector
+        (test_dir_cosmic) output files
+    fi_rna_opa_files : List[dict]|None
+        List of dictionaries containing DXLinks to FusionInspector
+        (rna_opa) output files
 
     Returns
     -------
@@ -84,6 +92,10 @@ def main(
     sf_previous_data = dxpy.DXFile(SF_previous_runs_data)
     ref_sources = dxpy.DXFile(reference_sources)
     previous_positives = dxpy.DXFile(previous_positives)
+    if fi_testdir_cosmic_files is not None:
+        fusioninspector_files += [dxpy.DXFile(item) for item in fi_testdir_cosmic_files]
+    if fi_rna_opa_files is not None:
+        fusioninspector_files += [dxpy.DXFile(item) for item in fi_rna_opa_files]
 
     df_starfusion = parse_star_fusion(starfusion_files)
     df_fusioninspector = parse_fusion_inspector(fusioninspector_files)
