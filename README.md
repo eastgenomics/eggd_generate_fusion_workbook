@@ -6,8 +6,15 @@ Collates Fusion candidates and associated metadata from STAR-Fusion, FusionInspe
 ## What inputs are required for this app to run?
 - `-istarfusion_files` : An array of DNAnexus file IDs of STAR-Fusion's prediction files
 - `-ifusioninspector_files` : An array of DNAnexus file IDs of FusionInspector's output files
-- `-ifastqc_data`: The DNAnexus file ID of FASTQC metrics file
+- `-ifi_testdir_cosmic_files` : (optional) An array of DNAnexus file IDs of FusionInspector's output (testdir_cosmic) files
+- `-ifi_rna_opa_files` : (optional) An array of DNAnexus file IDs of FusionInspector's output (rna_opa) files
+- `-imultiqc_files`: An array of DNAnexus file IDs of MultiQC output metrics file
 - `-iSF_previous_runs_data` : The DNAnexus file ID of a static file containing historical STAR-Fusion data
+- `ireference_sources` : The DNAnexus file ID of a static file containing aggregated data source from COSMIC, FusionDGB2 and ChimerDB
+- `iprevious_positives`: The DNAnexus file ID of a static file containing previously reported fusions
+
+> [!NOTE]
+> Currently, the `eggd_fusioninspector/1.0.0` app  produces three separate outputs: scientists, testdir_cosmic and rnaopa. The input field `fusioninspector_files` corresponds to the scientists output, while `fi_testdir_cosmic_files` and `fi_rna_opa_files` correspond to the latter two. However, in a future version of `eggd_fusioninspector`, these outputs will be merged into a single output, which will be used as the input for `fusioninspector_files`. As a result, the `fi_testdir_cosmic_files` and `fi_rna_opa_files` inputs are optional for now and will be deprecated once the update is released.
 
 ## How does this app work?
 - Parses all inputs and format data according to structure of source data
@@ -19,5 +26,5 @@ Collates Fusion candidates and associated metadata from STAR-Fusion, FusionInspe
 
 #### TODO
 - Add unit tests
-- optimise reading of large dx files
-- add more validations to parser module
+- Add scripts to generate static inputs
+- Add more validations to parser module

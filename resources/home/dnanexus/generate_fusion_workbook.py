@@ -23,6 +23,8 @@ from utils.defaults import (
     SF_SHEET_CONFIG,
     FASTQC_PIVOT_CONFIG,
     SF_PIVOT_CONFIG,
+    PREV_POS_SHEET_CONFIG,
+    REF_SOURCES_SHEET_CONFIG,
 )
 from utils.excel import format_workbook, write_df_to_sheet
 from utils.parser import (
@@ -32,11 +34,13 @@ from utils.parser import (
     make_fastqc_pivot,
     make_sf_pivot,
     parse_sf_previous,
+    parse_prev_pos,
 )
 from utils.summary_sheet import write_summary
 from utils.utils import (
     get_project_info,
     read_dxfile,
+    get_dxfile,
 )
 
 
@@ -44,8 +48,12 @@ from utils.utils import (
 def main(
     starfusion_files: List[dict],
     fusioninspector_files: List[dict],
-    fastqc_data: dict,
+    multiqc_files: List[dict],
     SF_previous_runs_data: dict,
+    reference_sources: dict,
+    previous_positives: dict,
+    fi_testdir_cosmic_files: List[dict] | None = None,
+    fi_rna_opa_files: List[dict] | None = None,
 ):
     """Generates a fusion workbook with data from
     STAR-Fusion, FusionInspector, and FastQC
@@ -56,10 +64,20 @@ def main(
         List of dictionaries containing DXLinks to STAR-Fusion output files
     fusioninspector_files : List[dict]
         List of dictionaries containing DXLinks to FusionInspector output files
-    fastqc_data : dict
-        Mapping of DXLink to FastQC data file
-    SF_previous_runs_data : str
+    multiqc_files : List[dict]
+        List of dictionaries containing DXLinks to MultiQC output files
+    SF_previous_runs_data : dict
        Mapping of DXLink to STAR-Fusion previous runs data file
+    reference_sources : dict
+       Mapping of DXLink to ReferenceSources file
+    previous_positives : dict
+       Mapping of DXLink to PreviousPositives file
+    fi_testdir_cosmic_files : List[dict]|None
+        List of dictionaries containing DXLinks to FusionInspector
+        (test_dir_cosmic) output files
+    fi_rna_opa_files : List[dict]|None
+        List of dictionaries containing DXLinks to FusionInspector
+        (rna_opa) output files
 
     Returns
     -------
@@ -69,13 +87,22 @@ def main(
     # Initialize inputs into dxpy.DXDataObject instances
     starfusion_files = [dxpy.DXFile(item) for item in starfusion_files]
     fusioninspector_files = [dxpy.DXFile(item) for item in fusioninspector_files]
-    fastqc_data = dxpy.DXFile(fastqc_data)
+    multiqc_files = [dxpy.DXFile(item) for item in multiqc_files]
+    fastqc_data = get_dxfile(multiqc_files, "multiqc_fastqc.txt")
     sf_previous_data = dxpy.DXFile(SF_previous_runs_data)
+    ref_sources = dxpy.DXFile(reference_sources)
+    previous_positives = dxpy.DXFile(previous_positives)
+    if fi_testdir_cosmic_files is not None:
+        fusioninspector_files += [dxpy.DXFile(item) for item in fi_testdir_cosmic_files]
+    if fi_rna_opa_files is not None:
+        fusioninspector_files += [dxpy.DXFile(item) for item in fi_rna_opa_files]
 
     df_starfusion = parse_star_fusion(starfusion_files)
     df_fusioninspector = parse_fusion_inspector(fusioninspector_files)
     df_fastqc = parse_fastqc(fastqc_data)
     df_sf_previous = parse_sf_previous(sf_previous_data)
+    df_ref_sources = read_dxfile(ref_sources, include_fname=False)
+    df_prev_pos = parse_prev_pos(previous_positives)
 
     project_name, _ = get_project_info()
     outfile = f"{project_name}_fusion_workbook.xlsx"
@@ -84,6 +111,12 @@ def main(
 
         # Writes empty EPIC sheet
         write_df_to_sheet(writer, pd.DataFrame(), **EPIC_SHEET_CONFIG)
+
+        # Writes RefSources sheet
+        write_df_to_sheet(writer, df_ref_sources, **REF_SOURCES_SHEET_CONFIG)
+
+        # Writes PreviousPositives sheet
+        write_df_to_sheet(writer, df_prev_pos, **PREV_POS_SHEET_CONFIG)
 
         # Add SF previous runs data
         write_df_to_sheet(writer, df_sf_previous, **SF_PREVIOUS_RUNS_SHEET_CONFIG)
@@ -107,6 +140,8 @@ def main(
             df_sf_previous,
             fastqc_pivot,
             df_fusioninspector,
+            df_prev_pos,
+            df_ref_sources,
             SF_PIVOT_CONFIG,
         )
         write_summary(writer, sf_pivot, SF_PIVOT_CONFIG)

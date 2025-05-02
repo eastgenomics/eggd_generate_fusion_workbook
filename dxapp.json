@@ -20,17 +20,43 @@
         "help": "FusionInspector output files for validation of fusions"
       },
       {
-        "name": "fastqc_data",
-        "label": "fastqc_data",
-        "class": "file",
+        "name": "fi_testdir_cosmic_files",
+        "label": "fi_testdir_cosmic_files",
+        "class": "array:file",
+        "optional": true,
+        "help": "FusionInspector output (testdir_cosmic) files for validation of fusions"
+      },
+      {
+        "name": "fi_rna_opa_files",
+        "label": "fi_rna_opa_files",
+        "class": "array:file",
+        "optional": true,
+        "help": "FusionInspector output (rna_opa) files for validation of fusions"
+      },
+      {
+        "name": "multiqc_files",
+        "label": "multiqc_files",
+        "class": "array:file",
         "optional": false,
-        "help": "FastQC output file containing quality metrics for the sequencing data"
+        "help": "MultiQC output files containing quality metrics for the sequencing data"
       },
       {
         "name": "SF_previous_runs_data",
         "class": "file",
         "optional": false,
         "help": "File containing info of STAR-Fusion's predictons from previous runs"
+      },
+      {
+        "name": "reference_sources",
+        "class": "file",
+        "optional": false,
+        "help": "File containing aggregated data source from COSMIC, FusionDGB2 and ChimerDB"
+      },
+      {
+        "name": "previous_positives",
+        "class": "file",
+        "optional": false,
+        "help": "File containing previously reported fusions"
       }
     ],
     "outputSpec": [
@@ -56,8 +82,10 @@
       "release": "24.04",
       "version": "0"
     },
+    "openSource": true,
     "access": {
-      "project": "CONTRIBUTE"
+      "project": "CONTRIBUTE",
+      "allProjects": "CONTRIBUTE"
     },
     "regionalOptions": {
       "aws:eu-central-1": {
