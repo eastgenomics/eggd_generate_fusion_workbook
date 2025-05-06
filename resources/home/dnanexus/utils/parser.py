@@ -60,8 +60,7 @@ def parse_sf_previous(dxfile: DXDataObject) -> pd.DataFrame:
 
     df = read_dxfile(dxfile, include_fname=False)
     df = (
-        df[["#FusionName", "Count_Run_1_Run_20_predicted"]]
-        .rename(columns={"Count_Run_1_Run_20_predicted": "Count_predicted"})
+        df[["#FusionName", "Count_predicted"]]
         .drop_duplicates()
         .sort_values(by="#FusionName")
         .reset_index(drop=True)
