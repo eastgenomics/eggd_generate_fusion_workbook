@@ -129,7 +129,6 @@ def add_lookup_columns(
             if row not in merged_rows:
                 formula = formula_template.replace("{row}", str(row))
                 cell = worksheet.cell(row=row, column=new_col_idx, value=formula)
-                #cell.alignment = Alignment(vertical="top")
 
 
 def format_summary_sheet(
