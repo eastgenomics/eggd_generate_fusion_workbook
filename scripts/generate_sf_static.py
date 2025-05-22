@@ -152,8 +152,8 @@ def parse_fusion_files(df: pd.DataFrame) -> pd.DataFrame:
 
     Parameters
     ----------
-    dxfiles : List[DXDataObject]
-        A list of DNAnexus file objects.
+    df : pd.DataFrame
+        A pandas dataframe containing files to parse.
 
     Returns
     -------
@@ -193,7 +193,7 @@ def upload_static_file(data: pd.DataFrame, project_id: str) -> None:
 
     data.to_csv(file_name, sep="\t", index=False)
 
-    # uploaod to DNAnexus
+    # upload to DNAnexus
     res = dxpy.upload_local_file(
         filename=file_name,
         project=project_id,
