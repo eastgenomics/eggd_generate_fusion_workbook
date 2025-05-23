@@ -5,6 +5,7 @@ been called in all PANCAN runs
 """
 
 import argparse
+import os
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
@@ -167,13 +168,16 @@ def parse_fusion_files(df: pd.DataFrame) -> pd.DataFrame:
     files = list(df.file_id)
     projects = list(df.project_id)
     args = zip(files, projects)
-
-    with ThreadPoolExecutor(max_workers=32) as executor:
+    
+    n_workers = min(32, os.cpu_count() * 6)
+    with ThreadPoolExecutor(max_workers=n_workers) as executor:
         df = pd.concat(
             list(executor.map(lambda x: read_sf_file(*x), args)), ignore_index=True
         )
     # save intermediate file for reference
-    df.to_csv("pancan_sf_data.csv", index=False)
+    date_str = datetime.now().strftime("%y%m%d")
+    file_name = f"sf_previous_runs_raw_data_{date_str}.csv"
+    df.to_csv(file_name, index=False)
     return df
 
 
@@ -194,14 +198,15 @@ def upload_static_file(data: pd.DataFrame, project_id: str) -> None:
     data.to_csv(file_name, sep="\t", index=False)
 
     # upload to DNAnexus
-    res = dxpy.upload_local_file(
-        filename=file_name,
-        project=project_id,
-    )
-    if res.id:
+    try:
+        res = dxpy.upload_local_file(
+            filename=file_name,
+            project=project_id,
+        )
         print(f"Successfully uploaded {file_name} ({res.id}) to {project_id}")
-    else:
-        print("Error uploading file")
+    except Exception as e:
+        print(f"Error uploading file": {e})
+        sys.exit(1)
 
 
 def generate_static_file() -> pd.DataFrame:
