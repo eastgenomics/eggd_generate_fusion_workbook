@@ -168,7 +168,7 @@ def parse_fusion_files(df: pd.DataFrame) -> pd.DataFrame:
     files = list(df.file_id)
     projects = list(df.project_id)
     args = zip(files, projects)
-    
+
     n_workers = min(32, os.cpu_count() * 6)
     with ThreadPoolExecutor(max_workers=n_workers) as executor:
         df = pd.concat(
@@ -205,7 +205,7 @@ def upload_static_file(data: pd.DataFrame, project_id: str) -> None:
         )
         print(f"Successfully uploaded {file_name} ({res.id}) to {project_id}")
     except Exception as e:
-        print(f"Error uploading file": {e})
+        print(f"Error uploading file: {e}")
         sys.exit(1)
 
 
