@@ -61,11 +61,19 @@ def read_cosmic(tar_path: str) -> pd.DataFrame:
     """
 
     with tarfile.open(tar_path, "r") as tar:
-
-        member = tar.getmember("Cosmic_Fusion_v101_GRCh37.tsv.gz")
-        f = tar.extractfile(member)
+        fname = "Cosmic_Fusion_v101_GRCh37.tsv.gz"
+        req_cols = ["FIVE_PRIME_GENE_SYMBOL", "THREE_PRIME_GENE_SYMBOL"]
+        
+        try:
+            member = tar.getmember(fname)
+            f = tar.extractfile(member)
+        except KeyError:
+            raise ValueError(f"Expected {fname} not in COSMIC tar")
 
         df = pd.read_csv(f, sep="\t", compression="gzip")
+        missing_cols = [col for col in req_cols if col not in df.columns]
+        if missing_cols:
+            raise ValueError(f"Missing required columns: {missing_cols}")
 
         fusions = df.FIVE_PRIME_GENE_SYMBOL + "--" + df.THREE_PRIME_GENE_SYMBOL
         print(f"COSMIC: {len(set(fusions))} unique fusions")
@@ -91,6 +99,9 @@ def read_chimerkb4(file_path: str) -> pd.DataFrame:
     df = pd.read_excel(file_path)
 
     # Replace '-' with '--' in fusion column
+    if "Fusion_pair" not in df.columns:
+        raise ValueError(f"Missing 'Fusion_pair' col in ChimerKB4 data")
+    
     fusions = df["Fusion_pair"].str.replace("-", "--")
     print(f"ChimerKB4: {len(set(fusions))} unique fusions")
 
@@ -114,6 +125,9 @@ def read_fusiongdb2(file_path: str) -> pd.DataFrame:
     df = pd.read_csv(file_path, sep="\t", header=None)
 
     # Extract the second column (fusion names)
+     if len(df.columns) < 2:
+         raise ValueError("FusionGDB2 file must have at least 2 columns")
+     
     fusions = df[1].str.replace("-", "--")
     print(f"FusionGDB2: {len(set(fusions))} unique fusions")
 

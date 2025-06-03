@@ -283,13 +283,6 @@ def parse_prev_pos(dxfile: DXDataObject) -> pd.DataFrame:
     df = read_dxfile(dxfile, sep=",", include_fname=False)
     df["#FusionName"] = df["Test Result"].apply(extract_fusions)
 
-    # Keep only SP and Fusions columns
-    df = df[["Specimen Identifier", "#FusionName"]].rename(
-        columns={"Specimen Identifier": "PreviousPositives"}
-    )
-    # Explode so each fusion gets its own row
-    df = df.explode("#FusionName", ignore_index=True).dropna(subset=["#FusionName"])
-
     return df
 
 
@@ -359,6 +352,12 @@ def make_sf_pivot(
         ).rename(columns={"PROT_FUSION_TYPE": "FRAME"})
 
     # add prev positives
+    prev_pos = (
+        prev_pos[["Specimen Identifier", "#FusionName"]]
+        .rename(columns={"Specimen Identifier": "PreviousPositives"})
+        .explode("#FusionName", ignore_index=True)
+        .dropna(subset=["#FusionName"])
+    )
     prev_pos_agg = (
         prev_pos.groupby("#FusionName")["PreviousPositives"]
         .apply(lambda x: ",".join(sorted(x)))
