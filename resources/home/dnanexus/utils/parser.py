@@ -49,7 +49,7 @@ def extract_fusions(text: str) -> list:
     """
     Processes free-text reports to identify gene fusion patterns
     (e.g., EML4::ALK, TPM3- ROS1, EWSR1-SMAD3-rearranged, ),
-    filters out reference sequences (NM_|NR_|ENST), and
+    filters out transcript IDs (NM_|NR_|ENST), and
     standardises gene pairs with '--' separator.
 
     Parameters
@@ -67,7 +67,7 @@ def extract_fusions(text: str) -> list:
         return []
 
     # Accounts for accidental white space in sepators;
-    # OK to capture some non-gene fusions here; 
+    # OK to capture some non-gene fusions here;
     # Only true fusions will be merged in summary sheet
     pattern = r"""
         \b
@@ -287,7 +287,6 @@ def parse_prev_pos(dxfile: DXDataObject) -> pd.DataFrame:
     df = df[["Specimen Identifier", "#FusionName"]].rename(
         columns={"Specimen Identifier": "PreviousPositives"}
     )
-
     # Explode so each fusion gets its own row
     df = df.explode("#FusionName", ignore_index=True).dropna(subset=["#FusionName"])
 
@@ -377,8 +376,12 @@ def make_sf_pivot(
     df["ReferenceSources"] = df["ReferenceSources"].fillna("")
 
     # Create final pivot table
-    df = df.sort_values(by=["FFPM"]).reset_index(drop=True)
-    pivot_df = create_pivot_table(df, pivot_config)
+    df = df.sort_values(by=["FFPM"], na_position="first").reset_index(drop=True)
+    pivot_df = (
+        df.groupby(pivot_config["index"], dropna=False)[pivot_config["values"]]
+        .first()
+        .sort_values(by=["SPECIMEN", "LEFTRIGHT"], na_position="first")
+    )
 
     pivot_df = pivot_df[
         [
