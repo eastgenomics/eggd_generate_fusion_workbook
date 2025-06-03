@@ -93,7 +93,7 @@ def add_lookup_columns(
     merged_ranges = [
         r for r in worksheet.merged_cells.ranges if r.min_col == spec_col_idx
     ]
-    
+
     # Keep track of rows in merged ranges
     merged_rows = set()
     for r in merged_ranges:
@@ -123,7 +123,7 @@ def add_lookup_columns(
             # Clear other merged cells (they inherit from first cell)
             for row in range(start + 1, end + 1):
                 worksheet.cell(row=row, column=new_col_idx, value=None)
-                
+
         # Handle rows (not part of any merged range). Case of 1 fusion per sample
         for row in range(2, worksheet.max_row + 1):
             if row not in merged_rows:

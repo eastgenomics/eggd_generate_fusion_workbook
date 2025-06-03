@@ -38,6 +38,14 @@ def read_dxfile(
         fname = dxfile.name
         df.insert(0, "file_name", fname)
 
+        # add a blank row with file name;
+        # useful for samples with no fusion and for filtering excel
+        dummy_row = pd.DataFrame(
+            [[fname] + [pd.NA] * (df.shape[1] - 1)], columns=df.columns
+        )
+
+        df = pd.concat([dummy_row, df], ignore_index=True)
+
     return df
 
 

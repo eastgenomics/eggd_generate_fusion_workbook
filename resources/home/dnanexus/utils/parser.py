@@ -2,6 +2,7 @@
 pandas data frame
 """
 
+import re
 from concurrent.futures import ThreadPoolExecutor
 from typing import List
 
@@ -42,6 +43,47 @@ def parse_igv_specimen_name(sample: str) -> str:
         extracted SP eg 12345678-2XXXXSXXX-25PCAN4
     """
     return "-".join(sample.split("-")[:3])
+
+
+def extract_fusions(text: str) -> list:
+    """
+    Processes free-text reports to identify gene fusion patterns
+    (e.g., EML4::ALK, TPM3- ROS1, EWSR1-SMAD3-rearranged, ),
+    filters out transcript IDs (NM_|NR_|ENST), and
+    standardises gene pairs with '--' separator.
+
+    Parameters
+    ----------
+    text : str
+        Free-text input from scientist reports containing fusion genes
+
+    Returns
+    -------
+    list
+        Unique standardised fusion pairs in GENE1--GENE2 format,
+        or empty list if no valid fusions found
+    """
+    if not text or pd.isna(text):
+        return []
+
+    # Accounts for accidental white space in sepators;
+    # OK to capture some non-gene fusions here;
+    # Only true fusions will be merged in summary sheet
+    pattern = r"""
+        \b
+        (?!NM_|NR_|ENST)
+        ([A-Z]{2,}[A-Za-z0-9_-]*)
+        \s*
+        (?: :: | -- | - )
+        \s*
+        (?!NM_|NR_|ENST)
+        ([A-Z]{2,}[A-Za-z0-9_-]*)
+        \b
+    """
+    matches = re.findall(pattern, text, re.VERBOSE)
+
+    # Deduplicate and standardise format
+    return list({f"{g1}--{g2}" for g1, g2 in matches if g1 and g2})
 
 
 def parse_sf_previous(dxfile: DXDataObject) -> pd.DataFrame:
@@ -239,7 +281,8 @@ def parse_prev_pos(dxfile: DXDataObject) -> pd.DataFrame:
 
     """
     df = read_dxfile(dxfile, sep=",", include_fname=False)
-    df["Fusion"] = df["Fusion"].str.replace("::", "--", regex=False)
+    df["#FusionName"] = df["Test Result"].apply(extract_fusions)
+
     return df
 
 
@@ -309,11 +352,16 @@ def make_sf_pivot(
         ).rename(columns={"PROT_FUSION_TYPE": "FRAME"})
 
     # add prev positives
+    prev_pos = (
+        prev_pos[["Specimen Identifier", "#FusionName"]]
+        .rename(columns={"Specimen Identifier": "PreviousPositives"})
+        .explode("#FusionName", ignore_index=True)
+        .dropna(subset=["#FusionName"])
+    )
     prev_pos_agg = (
-        prev_pos.groupby("Fusion")["Specimen ID"]
+        prev_pos.groupby("#FusionName")["PreviousPositives"]
         .apply(lambda x: ",".join(sorted(x)))
         .reset_index()
-        .rename(columns={"Fusion": "#FusionName", "Specimen ID": "PreviousPositives"})
     )
     df = df.merge(prev_pos_agg, on="#FusionName", how="left")
     df["PreviousPositives"] = df["PreviousPositives"].fillna("")
@@ -327,8 +375,12 @@ def make_sf_pivot(
     df["ReferenceSources"] = df["ReferenceSources"].fillna("")
 
     # Create final pivot table
-    df = df.sort_values(by=["FFPM"]).reset_index(drop=True)
-    pivot_df = create_pivot_table(df, pivot_config)
+    df = df.sort_values(by=["FFPM"], na_position="first").reset_index(drop=True)
+    pivot_df = (
+        df.groupby(pivot_config["index"], dropna=False)[pivot_config["values"]]
+        .first()
+        .sort_values(by=["SPECIMEN", "LEFTRIGHT"], na_position="first")
+    )
 
     pivot_df = pivot_df[
         [
