@@ -125,8 +125,8 @@ def read_fusiongdb2(file_path: str) -> pd.DataFrame:
     df = pd.read_csv(file_path, sep="\t", header=None)
 
     # Extract the second column (fusion names)
-     if len(df.columns) < 2:
-         raise ValueError("FusionGDB2 file must have at least 2 columns")
+    if len(df.columns) < 2:
+        raise ValueError("FusionGDB2 file must have at least 2 columns")
      
     fusions = df[1].str.replace("-", "--")
     print(f"FusionGDB2: {len(set(fusions))} unique fusions")
