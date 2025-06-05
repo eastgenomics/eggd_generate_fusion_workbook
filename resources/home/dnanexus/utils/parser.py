@@ -281,6 +281,7 @@ def parse_prev_pos(dxfile: DXDataObject) -> pd.DataFrame:
 
     """
     df = read_dxfile(dxfile, sep=",", include_fname=False)
+    df["Test Result"] = df["Test Result"].str.lstrip()
     df["#FusionName"] = df["Test Result"].apply(extract_fusions)
 
     return df
