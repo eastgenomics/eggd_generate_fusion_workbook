@@ -281,6 +281,7 @@ def parse_prev_pos(dxfile: DXDataObject) -> pd.DataFrame:
 
     """
     df = read_dxfile(dxfile, sep=",", include_fname=False)
+    df["Test Result"] = df["Test Result"].str.lstrip()
     df["#FusionName"] = df["Test Result"].apply(extract_fusions)
 
     return df
@@ -338,7 +339,10 @@ def make_sf_pivot(
             on="#FusionName",
             how="left",
         )
-        df["Count_predicted"] = df["Count_predicted"].fillna(0).astype(int)
+        mask = df["#FusionName"].notna()
+        df.loc[mask, "Count_predicted"] = (
+            df.loc[mask, "Count_predicted"].fillna(0).astype(int)
+        )
 
     # Merge FastQC metrics (VLOOKUP to FastQC_pivot)
     if not fastqc_pivot_df.empty:
