@@ -338,7 +338,10 @@ def make_sf_pivot(
             on="#FusionName",
             how="left",
         )
-        df["Count_predicted"] = df["Count_predicted"].fillna(0).astype(int)
+        mask = df["#FusionName"].notna()
+        df.loc[mask, "Count_predicted"] = (
+            df.loc[mask, "Count_predicted"].fillna(0).astype(int)
+        )
 
     # Merge FastQC metrics (VLOOKUP to FastQC_pivot)
     if not fastqc_pivot_df.empty:
