@@ -53,7 +53,7 @@ EPIC_SHEET_CONFIG = {
         "Month_Received": '=TEXT(C{row},"mmmm")',
         "Specimen": "=MID(B{row},4,100)",
         "EPIC": '=CONCATENATE(H{row}," | ",I{row}," | ",E{row})',
-        "Days": "=TODAY()-C{row}",
+        "Days": "=ROUND(TODAY()-C{row}, 2)",
     },
     "start_col": 35,
     "end_row": 100000,
