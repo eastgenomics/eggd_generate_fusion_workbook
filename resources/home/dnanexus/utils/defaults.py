@@ -56,7 +56,7 @@ EPIC_SHEET_CONFIG = {
         "Days": "=TODAY()-C{row}",
     },
     "start_col": 35,
-    "end_row": 10000,
+    "end_row": 100000,
 }
 
 REF_SOURCES_SHEET_CONFIG = {
