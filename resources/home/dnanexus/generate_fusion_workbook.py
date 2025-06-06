@@ -26,7 +26,7 @@ from utils.defaults import (
     PREV_POS_SHEET_CONFIG,
     REF_SOURCES_SHEET_CONFIG,
 )
-from utils.excel import format_workbook, write_df_to_sheet
+from utils.excel import format_workbook, write_df_to_sheet, add_extra_columns
 from utils.parser import (
     parse_fastqc,
     parse_fusion_inspector,

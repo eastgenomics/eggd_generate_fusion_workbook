@@ -49,7 +49,14 @@ SF_PREVIOUS_RUNS_SHEET_CONFIG = {
 EPIC_SHEET_CONFIG = {
     "sheet_name": "EPIC",
     "tab_color": "48B7D9",
-    "extra_cols": None,
+    "extra_cols": {
+        "Month_Received": '=TEXT(C{row},"mmmm")',
+        "Specimen": "=MID(B{row},4,100)",
+        "EPIC": '=CONCATENATE(H{row}," | ",I{row}," | ",E{row})',
+        "Days": "=TODAY()-C{row}",
+    },
+    "start_col": 35,
+    "end_row": 100000,
 }
 
 REF_SOURCES_SHEET_CONFIG = {
