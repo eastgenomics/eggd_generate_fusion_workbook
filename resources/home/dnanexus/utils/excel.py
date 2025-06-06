@@ -14,7 +14,10 @@ DEFAULT_FONT.size = 11
 
 
 def add_extra_columns(
-    worksheet: Worksheet, extra_cols: dict[str, str], start: int = 1
+    worksheet: Worksheet,
+    extra_cols: dict[str, str],
+    start_col: int = 1,
+    end_row: int | None = None,
 ) -> None:
     """
     Inserts additional columns with formulas at the beginning of a sheet
@@ -25,21 +28,26 @@ def add_extra_columns(
         The worksheet where columns will be added.
     extra_cols : dict[str, str]
         A mapping of column names to Excel formulas
-    start : int, optional
+    start_col : int, optional
         The column index (1-based) where extra columns should be inserted.
         Defaults to 1 (beginning of the sheet).
+    end_row : int|None, optional
+        The row index (1-based) where formula should be end.
+        Defaults to worksheet.max_row if not given.
 
     Returns
     -------
     None
     """
+    if end_row is None:
+        end_row = worksheet.max_row
 
     num_cols = len(extra_cols)
-    worksheet.insert_cols(start, amount=num_cols)
+    worksheet.insert_cols(start_col, amount=num_cols)
 
-    for i, (col, formula) in enumerate(extra_cols.items(), start=start):
+    for i, (col, formula) in enumerate(extra_cols.items(), start=start_col):
         worksheet.cell(row=1, column=i, value=col)
-        for row in range(2, worksheet.max_row + 1):
+        for row in range(2, end_row + 1):
             worksheet.cell(row=row, column=i, value=formula.replace("{row}", str(row)))
 
 
@@ -484,6 +492,8 @@ def write_df_to_sheet(
     sheet_name: str,
     tab_color: str = "000000",
     extra_cols: dict[str, str] = None,
+    start_col: int = 1,
+    end_row: int | None = None,
     include_index: bool = False,
 ) -> None:
     """Writes a Pandas DataFrame to an Excel sheet with formatting.
@@ -504,6 +514,12 @@ def write_df_to_sheet(
                 "Specimen": "=MID(C{row},11,10)",
                 "EPIC": "=VLOOKUP(A{row},EPIC!AJ:AK,2,0)"
             }
+    start_col : int, optional
+        The column index (1-based) where extra columns should be inserted.
+        Defaults to 1 (beginning of the sheet).
+    end_row : int|None, optional
+        The row index (1-based) where formula should be end.
+        Defaults to worksheet.max_row if not given.
     include_index : bool, optional
         Wether to write index of df to sheet. Defaults to False
     """
@@ -514,7 +530,7 @@ def write_df_to_sheet(
 
     # Add extra columns if provided
     if extra_cols:
-        add_extra_columns(worksheet, extra_cols)
+        add_extra_columns(worksheet, extra_cols, start_col, end_row)
 
     adjust_column_widths(worksheet)
 
