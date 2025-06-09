@@ -486,6 +486,38 @@ def rotate_headers(sheet: Worksheet, header_row: int = 1, degree: int = 90) -> N
     sheet.row_dimensions[header_row].height = 130
 
 
+def format_columns_to_two_dp(
+    worksheet: Worksheet, header_row: int = 1, number_format: str = "0.00"
+) -> None:
+    """
+    Apply 2 decimal-place number formatting to column if the header matches
+    specified column names.
+
+    Parameters
+    ----------
+    worksheet : Worksheet
+        The worksheet to modify.
+    header_row : int, optional
+        Row number containing the headers, default is 1.
+    number_format : str, optional
+        Excel number format string to apply, default is "0.00" (2DP).
+    """
+    max_col = worksheet.max_column
+    max_row = worksheet.max_row
+
+    target_headers = ["Days", "Unique Reads(M)", "Duplicate Reads(M)"]
+
+    for col in range(1, max_col + 1):
+        header_cell = worksheet.cell(row=header_row, column=col)
+        header = str(header_cell.value).strip() if header_cell.value else ""
+
+        if header in target_headers:
+            col_letter = header_cell.column_letter
+            for row in range(header_row + 1, max_row + 1):
+                cell = worksheet.cell(row=row, column=col)
+                cell.number_format = number_format
+
+
 def write_df_to_sheet(
     writer: pd.ExcelWriter,
     df: pd.DataFrame,
@@ -551,5 +583,6 @@ def format_workbook(writer: pd.ExcelWriter) -> None:
     for sheet in workbook.worksheets:
         colour_hyperlinks(sheet)
         apply_header_format(sheet)
+        format_columns_to_two_dp(sheet)
 
         # other general formating to follow here ...
