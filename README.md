@@ -24,7 +24,31 @@ Collates Fusion candidates and associated metadata from STAR-Fusion, FusionInspe
 ## What does this app output?
 - A Fusion Workbook named as `{project_name}_fusion_workbook.xlsx`
 
-#### TODO
-- Add unit tests
-- Add scripts to generate static inputs
-- Add more validations to parser module
+## Unit Testing
+Unit tests are located in `resources/home/dnanexus/tests/`
+
+Test modules include:
+- `test_excel.py` – Excel utility formatting and helpers
+- `test_parser.py` – Data parsing and transformation
+- `test_utils.py` – Generic helpers and validation logic
+
+### Run Tests Locally
+It is recommended to use a virtual environment to manage dependencies:
+
+```
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+```
+
+Then to run all tests in verbose mode:
+
+```
+pytest -v
+```
+Or to run a specific test file:
+
+```
+pytest -v resources/home/dnanexus/tests/test_parser.py
+```
