@@ -11,6 +11,7 @@ from .excel import (
     highlight_specimen_borders,
     style_borders,
     set_column_width,
+    set_column_font_colour,
     align_column_cells,
     add_drop_down_col,
     get_col_letter,
@@ -135,6 +136,7 @@ def format_summary_sheet(
     worksheet: Worksheet,
     source_df: pd.DataFrame,
     col_widths: dict,
+    col_colors: dict,
     ffpm_col: str = "FFPM",
     index_col: str = "SPECIMEN",
 ) -> None:
@@ -171,6 +173,8 @@ def format_summary_sheet(
 
     for col, width in col_widths.items():
         set_column_width(worksheet, col, width)
+    for col, color in col_colors.items():
+        set_column_font_colour(worksheet, col, color)
 
 
 def write_summary(
@@ -201,6 +205,7 @@ def write_summary(
     tab_color = config["tab_color"]
     lookup_cols = config["extra_cols"]
     col_widths = config["col_widths"]
+    col_colors = config["col_colors"]
 
     write_df_to_sheet(
         writer,
@@ -225,4 +230,4 @@ def write_summary(
             prompt=prompt,
             title=title,
         )
-    format_summary_sheet(summary_sheet, data, col_widths)
+    format_summary_sheet(summary_sheet, data, col_widths, col_colors)
