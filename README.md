@@ -14,7 +14,7 @@ Collates Fusion candidates and associated metadata from STAR-Fusion, FusionInspe
 - `iprevious_positives`: The DNAnexus file ID of a static file containing previously reported fusions
 
 > [!NOTE]
-> Currently, the `eggd_fusioninspector/1.0.0` app  produces three separate outputs: scientists, testdir_cosmic and rnaopa. The input field `fusioninspector_files` corresponds to the scientists output, while `fi_testdir_cosmic_files` and `fi_rna_opa_files` correspond to the latter two. However, in a future version of `eggd_fusioninspector`, these outputs will be merged into a single output, which will be used as the input for `fusioninspector_files`. As a result, the `fi_testdir_cosmic_files` and `fi_rna_opa_files` inputs are optional for now and will be deprecated once the update is released.
+> Currently, the `eggd_fusioninspector/1.1.0` app  produces three separate outputs: scientists, testdir_cosmic and rnaopa. The input field `fusioninspector_files` corresponds to the scientists output, while `fi_testdir_cosmic_files` and `fi_rna_opa_files` correspond to the latter two. However, in a future version of `eggd_fusioninspector`, these outputs will be merged into a single output, which will be used as the input for `fusioninspector_files`. As a result, the `fi_testdir_cosmic_files` and `fi_rna_opa_files` inputs are optional for now and will be deprecated once the update is released.
 
 ## How does this app work?
 - Parses all inputs and format data according to structure of source data

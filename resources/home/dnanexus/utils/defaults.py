@@ -83,6 +83,11 @@ FASTQC_PIVOT_CONFIG = {
     "sheet_name": "FastQC_Pivot",
     "tab_color": "C581F0",
     "add_total_row": True,
+    "extra_cols": {
+        "EPIC": "=VLOOKUP(A{row},'EPIC'!AJ:AK,2,0)",
+        "DAYS COUNT": "=VLOOKUP(A{row},'EPIC'!AJ:AL,3,0)",
+    },
+    "start_col": 4,
 }
 
 SF_PIVOT_CONFIG = {
@@ -146,4 +151,5 @@ SF_PIVOT_CONFIG = {
         "DAYS COUNT": "=VLOOKUP(B{row},'EPIC'!AJ:AL,3,0)",
     },
     "col_widths": {"D": 6, "E": 10, "F": 10, "J": 6, "K": 6, "L": 6, "M": 24, "N": 24},
+    "col_colors": {"L": "780373", "M": "01982f", "N": "01982f"}
 }

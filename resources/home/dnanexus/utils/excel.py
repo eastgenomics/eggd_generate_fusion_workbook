@@ -265,6 +265,23 @@ def set_column_width(worksheet: Worksheet, col_letter: str, width: float) -> Non
     """
     worksheet.column_dimensions[col_letter].width = width
 
+def set_column_font_colour(worksheet: Worksheet, col_letter: str, hex_color: str) -> None:
+    """
+    Set colour for a specified column.
+    For columns needing specific colours.
+
+    Parameters
+    ----------
+    worksheet : openpyxl.worksheet.worksheet.Worksheet
+        The target Excel worksheet
+    col_letter : str
+        Column letter to format (e.g., 'B', 'AA')
+    hex_color : str
+        Hex colour code for the sheet tab
+    """
+    for cell in worksheet[col_letter]:
+        cell.font = Font(color=hex_color, name=DEFAULT_FONT.name)
+
 
 def colour_hyperlinks(worksheet: Worksheet) -> None:
     """

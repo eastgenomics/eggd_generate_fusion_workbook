@@ -129,6 +129,8 @@ def main(
             fastqc_pivot,
             sheet_name=FASTQC_PIVOT_CONFIG["sheet_name"],
             tab_color=FASTQC_PIVOT_CONFIG["tab_color"],
+            extra_cols=FASTQC_PIVOT_CONFIG["extra_cols"],
+            start_col=FASTQC_PIVOT_CONFIG["start_col"],
         )
         # Add Fusion Inspector data
         write_df_to_sheet(writer, df_fusioninspector, **FI_SHEET_CONFIG)
