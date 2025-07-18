@@ -265,6 +265,23 @@ def parse_star_fusion(dxfiles: List[DXDataObject]) -> pd.DataFrame:
     # same as above; to allow further customisation per tool as needed.
     return _parse_fusion_files(dxfiles)
 
+def parse_arriba(dxfiles: List[DXDataObject]) -> pd.DataFrame:
+    """
+    Reads and concatenates an array of DNAnexus  Arriba files.
+
+    Parameters
+    ----------
+    dxfiles : List[DXDataObject]
+        A list of DNAnexus file objects.
+
+    Returns
+    -------
+    pd.DataFrame
+        A concatenated DataFrame containing the combined data
+        from all input files.
+    """
+    # same as above; to allow further customisation per tool as needed.
+    return _parse_fusion_files(dxfiles)
 
 def parse_prev_pos(dxfile: DXDataObject) -> pd.DataFrame:
     """Parse the content of previous_positives data and modify Fusion column

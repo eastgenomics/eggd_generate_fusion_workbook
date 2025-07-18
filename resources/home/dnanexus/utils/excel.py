@@ -541,6 +541,7 @@ def write_df_to_sheet(
     sheet_name: str,
     tab_color: str = "000000",
     extra_cols: dict[str, str] = None,
+    col_widths: dict = None,
     start_col: int = 1,
     end_row: int | None = None,
     include_index: bool = False,
@@ -582,6 +583,10 @@ def write_df_to_sheet(
         add_extra_columns(worksheet, extra_cols, start_col, end_row)
 
     adjust_column_widths(worksheet)
+    # Set column width for specific columns
+    if col_widths:
+        for col, width in col_widths.items():
+            set_column_width(worksheet, col, width)
 
 
 def format_workbook(writer: pd.ExcelWriter) -> None:
