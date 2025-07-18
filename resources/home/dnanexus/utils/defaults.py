@@ -27,6 +27,7 @@ SF_SHEET_CONFIG = {
         "LEFTRIGHT": '=CONCATENATE(S{row},"_",U{row})',
         "FRAME": "=VLOOKUP(I{row},'Fusion_Inspector'!C:AM,32,0)",
     },
+    "col_widths": {"K": 10},
 }
 
 FI_SHEET_CONFIG = {
@@ -37,6 +38,16 @@ FI_SHEET_CONFIG = {
         "ID": '=CONCATENATE(A{row},"_",E{row})',
         "LEFTRIGHT": '=CONCATENATE(L{row},"_",O{row})',
     },
+    "col_widths": {"D": 10},
+}
+
+ARRIBA_SHEET_CONFIG = {
+    "sheet_name": "Arriba",
+    "tab_color": "069a2e",
+    "extra_cols": {
+        "SPECIMEN": "=MID(B{row},11,10)",
+    },
+    "col_widths": {"B": 10},
 }
 
 SF_PREVIOUS_RUNS_SHEET_CONFIG = {

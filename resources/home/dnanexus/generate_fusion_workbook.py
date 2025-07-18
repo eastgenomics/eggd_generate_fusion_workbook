@@ -19,6 +19,7 @@ from utils.defaults import (
     EPIC_SHEET_CONFIG,
     FASTQC_SHEET_CONFIG,
     FI_SHEET_CONFIG,
+    ARRIBA_SHEET_CONFIG,
     SF_PREVIOUS_RUNS_SHEET_CONFIG,
     SF_SHEET_CONFIG,
     FASTQC_PIVOT_CONFIG,
@@ -31,6 +32,7 @@ from utils.parser import (
     parse_fastqc,
     parse_fusion_inspector,
     parse_star_fusion,
+    parse_arriba,
     make_fastqc_pivot,
     make_sf_pivot,
     parse_sf_previous,
@@ -48,6 +50,7 @@ from utils.utils import (
 def main(
     starfusion_files: List[dict],
     fusioninspector_files: List[dict],
+    arriba_files: List[dict],
     multiqc_files: List[dict],
     SF_previous_runs_data: dict,
     reference_sources: dict,
@@ -56,7 +59,7 @@ def main(
     fi_rna_opa_files: List[dict] | None = None,
 ):
     """Generates a fusion workbook with data from
-    STAR-Fusion, FusionInspector, and FastQC
+    STAR-Fusion, FusionInspector, Arriba, and FastQC
 
     Parameters
     ----------
@@ -64,6 +67,8 @@ def main(
         List of dictionaries containing DXLinks to STAR-Fusion output files
     fusioninspector_files : List[dict]
         List of dictionaries containing DXLinks to FusionInspector output files
+    arriba_files : List[dict]
+        List of dictionaries containing DXLinks to Arriba output files
     multiqc_files : List[dict]
         List of dictionaries containing DXLinks to MultiQC output files
     SF_previous_runs_data : dict
@@ -87,6 +92,7 @@ def main(
     # Initialize inputs into dxpy.DXDataObject instances
     starfusion_files = [dxpy.DXFile(item) for item in starfusion_files]
     fusioninspector_files = [dxpy.DXFile(item) for item in fusioninspector_files]
+    arriba_files = [dxpy.DXFile(item) for item in arriba_files]
     multiqc_files = [dxpy.DXFile(item) for item in multiqc_files]
     fastqc_data = get_dxfile(multiqc_files, "multiqc_fastqc.txt")
     sf_previous_data = dxpy.DXFile(SF_previous_runs_data)
@@ -99,6 +105,7 @@ def main(
 
     df_starfusion = parse_star_fusion(starfusion_files)
     df_fusioninspector = parse_fusion_inspector(fusioninspector_files)
+    df_arriba = parse_arriba(arriba_files)
     df_fastqc = parse_fastqc(fastqc_data)
     df_sf_previous = parse_sf_previous(sf_previous_data)
     df_ref_sources = read_dxfile(ref_sources, include_fname=False)
@@ -134,6 +141,9 @@ def main(
         )
         # Add Fusion Inspector data
         write_df_to_sheet(writer, df_fusioninspector, **FI_SHEET_CONFIG)
+
+        # Add Arriba data
+        write_df_to_sheet(writer, df_arriba, **ARRIBA_SHEET_CONFIG)
 
         # Add STAR-Fusion data
         write_df_to_sheet(writer, df_starfusion, **SF_SHEET_CONFIG)
