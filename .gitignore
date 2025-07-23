@@ -6,3 +6,4 @@ venv/
 *genes_ID_*.txt
 __pycache__/
 .pytest_cache
+input.json

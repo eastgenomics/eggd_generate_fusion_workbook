@@ -6,6 +6,7 @@ Collates Fusion candidates and associated metadata from STAR-Fusion, FusionInspe
 ## What inputs are required for this app to run?
 - `-istarfusion_files` : An array of DNAnexus file IDs of STAR-Fusion's prediction files
 - `-ifusioninspector_files` : An array of DNAnexus file IDs of FusionInspector's output files
+- `-iarriba_files`: An array of DNAnexus file IDs of Arriba output fusion files from STAR aligned BAMs
 - `-imultiqc_files`: An array of DNAnexus file IDs of MultiQC output metrics file
 - `-iSF_previous_runs_data` : The DNAnexus file ID of a static file containing historical STAR-Fusion data
 - `ireference_sources` : The DNAnexus file ID of a static file containing aggregated data source from COSMIC, FusionDGB2 and ChimerDB
@@ -18,6 +19,24 @@ Collates Fusion candidates and associated metadata from STAR-Fusion, FusionInspe
 
 ## What does this app output?
 - A Fusion Workbook named as `{project_name}_fusion_workbook.xlsx`
+
+## How to run this app from command line?
+Prepare inputs data by running the script `generate_inputs.py`, passing in the project ID of the run you want to generate a fusion workbook for.
+This is useful during testing or when the app couldn't be launched by `eggd_conductor` because of a failed downstream job and you need to run it manually.
+
+```
+python3 scripts/generate_inputs.py -p <project_id>
+
+```
+The above will write the file `input.json` which can then be passed to the `dx run` command below.
+
+```
+dx run eggd_eggd_generate_fusion_workbook/1.1.0 \
+-f input.json \
+--destination {}
+```
+Replace the placeholder `{}` with your desired output folder.
+
 
 ## Unit Testing
 Unit tests are located in `resources/home/dnanexus/tests/`
