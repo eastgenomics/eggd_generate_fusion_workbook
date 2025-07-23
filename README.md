@@ -21,12 +21,11 @@ Collates Fusion candidates and associated metadata from STAR-Fusion, FusionInspe
 - A Fusion Workbook named as `{project_name}_fusion_workbook.xlsx`
 
 ## How to run this app from command line?
-Prepare inputs data by running the script `generate_inputs.py`, passing in the project ID of the run you want to generate a fusion workbook for.
+Prepare input data by running the script `generate_inputs.py`, passing in the project ID of the run you want to generate a fusion workbook for.
 This is useful during testing or when the app couldn't be launched by `eggd_conductor` because of a failed downstream job and you need to run it manually.
 
 ```
 python3 scripts/generate_inputs.py -p <project_id>
-
 ```
 The above will write the file `input.json` which can then be passed to the `dx run` command below.
 
