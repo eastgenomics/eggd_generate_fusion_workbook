@@ -16,7 +16,7 @@
         "name": "fusioninspector_files",
         "label": "fusioninspector_files",
         "class": "array:file",
-        "optional": false,
+        "optional": true,
         "help": "FusionInspector output files for validation of fusions"
       },
       {

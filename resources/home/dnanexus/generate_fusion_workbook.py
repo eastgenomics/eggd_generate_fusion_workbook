@@ -4,7 +4,7 @@
 import os
 from glob import glob
 import subprocess
-from typing import List
+from typing import List, Optional
 
 if os.path.exists("/home/dnanexus"):
     # running in DNAnexus
@@ -49,12 +49,12 @@ from utils.utils import (
 @dxpy.entry_point("main")
 def main(
     starfusion_files: List[dict],
-    fusioninspector_files: List[dict],
     arriba_files: List[dict],
     multiqc_files: List[dict],
     SF_previous_runs_data: dict,
     reference_sources: dict,
     previous_positives: dict,
+    fusioninspector_files: Optional[List[dict]] = None,
 ):
     """Generates a fusion workbook with data from
     STAR-Fusion, FusionInspector, Arriba, and FastQC
@@ -63,8 +63,6 @@ def main(
     ----------
     starfusion_files : List[dict]
         List of dictionaries containing DXLinks to STAR-Fusion output files
-    fusioninspector_files : List[dict]
-        List of dictionaries containing DXLinks to FusionInspector output files
     arriba_files : List[dict]
         List of dictionaries containing DXLinks to Arriba output files
     multiqc_files : List[dict]
@@ -75,6 +73,8 @@ def main(
        Mapping of DXLink to ReferenceSources file
     previous_positives : dict
        Mapping of DXLink to PreviousPositives file
+    fusioninspector_files : Optional[List[dict]]
+        List of dictionaries containing DXLinks to FusionInspector output files
 
     Returns
     -------
@@ -83,7 +83,6 @@ def main(
     """
     # Initialize inputs into dxpy.DXDataObject instances
     starfusion_files = [dxpy.DXFile(item) for item in starfusion_files]
-    fusioninspector_files = [dxpy.DXFile(item) for item in fusioninspector_files]
     arriba_files = [dxpy.DXFile(item) for item in arriba_files]
     multiqc_files = [dxpy.DXFile(item) for item in multiqc_files]
     fastqc_data = get_dxfile(multiqc_files, "multiqc_fastqc.txt")
@@ -91,8 +90,14 @@ def main(
     ref_sources = dxpy.DXFile(reference_sources)
     previous_positives = dxpy.DXFile(previous_positives)
 
+    #Parse FusionInspector files if provided (optional input)
+    if fusioninspector_files:
+        fusioninspector_files = [dxpy.DXFile(item) for item in fusioninspector_files]
+        df_fusioninspector = parse_fusion_inspector(fusioninspector_files)
+    else:
+        df_fusioninspector = pd.DataFrame()
+
     df_starfusion = parse_star_fusion(starfusion_files)
-    df_fusioninspector = parse_fusion_inspector(fusioninspector_files)
     df_arriba = parse_arriba(arriba_files)
     df_fastqc = parse_fastqc(fastqc_data)
     df_sf_previous = parse_sf_previous(sf_previous_data)
