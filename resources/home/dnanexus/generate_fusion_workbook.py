@@ -132,8 +132,9 @@ def main(
             extra_cols=FASTQC_PIVOT_CONFIG["extra_cols"],
             start_col=FASTQC_PIVOT_CONFIG["start_col"],
         )
-        # Add Fusion Inspector data
-        write_df_to_sheet(writer, df_fusioninspector, **FI_SHEET_CONFIG)
+        # Add Fusion Inspector data (only if data was provided)
+        if not df_fusioninspector.empty:
+            write_df_to_sheet(writer, df_fusioninspector, **FI_SHEET_CONFIG)
 
         # Add Arriba data
         write_df_to_sheet(writer, df_arriba, **ARRIBA_SHEET_CONFIG)
