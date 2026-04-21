@@ -412,7 +412,6 @@ def make_sf_pivot(
             "Count_predicted",
             "ReferenceSources",
             "PreviousPositives",
-            "FRAME",
             "FFPM",
         ]
     if not fi_df.empty:
