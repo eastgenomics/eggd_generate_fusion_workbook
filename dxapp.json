@@ -3,7 +3,7 @@
     "title": "eggd_generate_fusion_workbook",
     "summary": "App for fusion workbook",
     "dxapi": "1.1.0",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "inputSpec": [
       {
         "name": "starfusion_files",
