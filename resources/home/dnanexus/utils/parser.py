@@ -403,8 +403,7 @@ def make_sf_pivot(
         .sort_values(by=["SPECIMEN", "LEFTRIGHT"], na_position="first")
     )
 
-    pivot_df = pivot_df[
-        [
+    cols = [
             "LeftBreakpoint",
             "#FusionName",
             "RightBreakpoint",
@@ -416,6 +415,9 @@ def make_sf_pivot(
             "FRAME",
             "FFPM",
         ]
-    ]
+    if not fi_df.empty:
+        cols.insert(-1, "FRAME")
+
+    pivot_df = pivot_df[cols]
 
     return pivot_df
