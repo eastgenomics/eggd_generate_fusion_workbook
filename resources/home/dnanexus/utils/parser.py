@@ -397,8 +397,9 @@ def make_sf_pivot(
 
     # Create final pivot table
     df = df.sort_values(by=["FFPM"], na_position="first").reset_index(drop=True)
+    values = [v for v in pivot_config["values"] if v in df.columns]
     pivot_df = (
-        df.groupby(pivot_config["index"], dropna=False)[pivot_config["values"]]
+        df.groupby(pivot_config["index"], dropna=False)[values]
         .first()
         .sort_values(by=["SPECIMEN", "LEFTRIGHT"], na_position="first")
     )
