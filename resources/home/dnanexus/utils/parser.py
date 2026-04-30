@@ -371,6 +371,8 @@ def make_sf_pivot(
         df = df.merge(
             fi_df[["LEFTRIGHT", "PROT_FUSION_TYPE"]], on="LEFTRIGHT", how="left"
         ).rename(columns={"PROT_FUSION_TYPE": "FRAME"})
+    else:
+        df["FRAME"] = pd.NA
 
     # add prev positives
     prev_pos = (
@@ -412,10 +414,9 @@ def make_sf_pivot(
             "Count_predicted",
             "ReferenceSources",
             "PreviousPositives",
+            "FRAME",
             "FFPM",
         ]
-    if not fi_df.empty:
-        cols.insert(-1, "FRAME")
 
     pivot_df = pivot_df[cols]
 
