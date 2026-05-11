@@ -190,6 +190,14 @@ class TestMakeSfPivot:
             }
         )
 
+        cls.arriba_df = pd.DataFrame(
+            {
+                "breakpoint1": ["chr1:123"],
+                "breakpoint2": ["chr2:456"],
+                "reading_frame": ["in-frame"],
+            }
+        )
+
         cls.prev_pos = pd.DataFrame(
             {
                 "Specimen Identifier": ["SP1"],
@@ -226,6 +234,7 @@ class TestMakeSfPivot:
             cls.sf_runs_df,
             cls.fastqc_pivot_df,
             cls.fi_df,
+            cls.arriba_df,
             cls.prev_pos,
             cls.ref_sources,
             cls.pivot_config,

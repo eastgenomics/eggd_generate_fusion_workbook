@@ -309,6 +309,7 @@ def make_sf_pivot(
     sf_runs_df: pd.DataFrame,
     fastqc_pivot_df: pd.DataFrame,
     fi_df: pd.DataFrame,
+    arriba_df: pd.DataFrame,
     prev_pos: pd.DataFrame,
     ref_sources: pd.DataFrame,
     pivot_config: dict,
@@ -325,6 +326,8 @@ def make_sf_pivot(
         FastQC summary data
     fi_df : pd.DataFrame
         Current Fusion Inspector data
+    arriba_df : pd.DataFrame
+        Current Arriba data
     prev_pos : pd.DataFrame
         Previously reported Fusions
     ref_sources : pd.DataFrame
@@ -365,14 +368,18 @@ def make_sf_pivot(
     if not fastqc_pivot_df.empty:
         df = df.merge(fastqc_pivot_df, on="SPECIMEN", how="left")
 
-    # Merge Fusion Inspector data
-    if not fi_df.empty:
-        fi_df["LEFTRIGHT"] = fi_df["LeftBreakpoint"] + "_" + fi_df["RightBreakpoint"]
+    # Merge Arriba data
+    if not arriba_df.empty:
+        arriba_df["LEFTRIGHT"] = arriba_df["breakpoint1"] + "_" + arriba_df["breakpoint2"]
+        df["LEFTRIGHT"] = (
+            df["LeftBreakpoint"].str.replace(r":[+-]$", "", regex=True)
+            + "_"
+            + df["RightBreakpoint"].str.replace(r":[+-]$", "", regex=True)
+        )
         df = df.merge(
-            fi_df[["LEFTRIGHT", "PROT_FUSION_TYPE"]], on="LEFTRIGHT", how="left"
-        ).rename(columns={"PROT_FUSION_TYPE": "FRAME"})
-    else:
-        df["FRAME"] = pd.NA
+            arriba_df[["LEFTRIGHT", "reading_frame"]], on="LEFTRIGHT", how="left"
+        ).rename(columns={"reading_frame": "FRAME"})
+
 
     # add prev positives
     prev_pos = (

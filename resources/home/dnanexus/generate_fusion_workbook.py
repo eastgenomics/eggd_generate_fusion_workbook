@@ -146,6 +146,7 @@ def main(
             df_sf_previous,
             fastqc_pivot,
             df_fusioninspector,
+            df_arriba,
             df_prev_pos,
             df_ref_sources,
             SF_PIVOT_CONFIG,
