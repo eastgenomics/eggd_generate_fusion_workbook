@@ -413,17 +413,18 @@ def make_sf_pivot(
     )
 
     cols = [
-            "LeftBreakpoint",
-            "#FusionName",
-            "RightBreakpoint",
-            "JunctionReadCount",
-            "SpanningFragCount",
-            "Count_predicted",
-            "ReferenceSources",
-            "PreviousPositives",
-            "FRAME",
-            "FFPM",
-        ]
+        "LeftBreakpoint",
+        "#FusionName",
+        "RightBreakpoint",
+        "JunctionReadCount",
+        "SpanningFragCount",
+        "Count_predicted",
+        "ReferenceSources",
+        "PreviousPositives",
+    ]
+    if "FRAME" in pivot_df.columns:
+        cols.append("FRAME")
+    cols.append("FFPM")
 
     pivot_df = pivot_df[cols]
 

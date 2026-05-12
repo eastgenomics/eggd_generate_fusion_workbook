@@ -257,3 +257,65 @@ class TestMakeSfPivot:
         assert row["#FusionName"] == "A--B"
         assert row["FRAME"] == "in-frame"
         assert row["ReferenceSources"] == "ChimerKDB"
+
+
+class TestMakeSfPivotNoArriba:
+    """Unit tests for make_sf_pivot when arriba_df is empty (no FRAME column)."""
+
+    @classmethod
+    def setup_class(cls):
+        cls.sf_df = pd.DataFrame(
+            {
+                "#FusionName": ["A--B"],
+                "LeftBreakpoint": ["chr1:123:+"],
+                "RightBreakpoint": ["chr2:456:+"],
+                "file_name": ["123-2XX-ABC"],
+                "JunctionReadCount": [100],
+                "SpanningFragCount": [200],
+                "FFPM": [10.5],
+            }
+        )
+        cls.sf_runs_df = pd.DataFrame({"#FusionName": ["A--B"], "Count_predicted": [5]})
+        cls.fastqc_pivot_df = pd.DataFrame(
+            {"SPECIMEN": ["2XX"], "Unique Reads": [1_000_000]}
+        )
+        cls.arriba_df = pd.DataFrame()
+        cls.prev_pos = pd.DataFrame(
+            {"Specimen Identifier": ["SP1"], "#FusionName": [["A--B"]]}
+        )
+        cls.ref_sources = pd.DataFrame(
+            {"Fusion": ["A--B"], "ReferenceSources": ["ChimerKDB"]}
+        )
+        cls.pivot_config = {
+            "index": ["SPECIMEN", "LEFTRIGHT"],
+            "columns": None,
+            "values": [
+                "LeftBreakpoint",
+                "#FusionName",
+                "RightBreakpoint",
+                "JunctionReadCount",
+                "SpanningFragCount",
+                "Count_predicted",
+                "ReferenceSources",
+                "PreviousPositives",
+                "FFPM",
+            ],
+        }
+        cls.result = parser.make_sf_pivot(
+            cls.sf_df,
+            cls.sf_runs_df,
+            cls.fastqc_pivot_df,
+            cls.arriba_df,
+            cls.prev_pos,
+            cls.ref_sources,
+            cls.pivot_config,
+        )
+
+    def test_pivot_does_not_raise(self):
+        assert not self.result.empty
+
+    def test_frame_column_absent(self):
+        assert "FRAME" not in self.result.columns
+
+    def test_ffpm_column_present(self):
+        assert "FFPM" in self.result.columns
