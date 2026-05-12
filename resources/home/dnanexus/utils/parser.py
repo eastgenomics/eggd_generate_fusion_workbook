@@ -308,7 +308,6 @@ def make_sf_pivot(
     sf_df: pd.DataFrame,
     sf_runs_df: pd.DataFrame,
     fastqc_pivot_df: pd.DataFrame,
-    fi_df: pd.DataFrame,
     arriba_df: pd.DataFrame,
     prev_pos: pd.DataFrame,
     ref_sources: pd.DataFrame,
@@ -324,8 +323,6 @@ def make_sf_pivot(
         Historical STAR-Fusion data
     fastqc_pivot_df : pd.DataFrame
         FastQC summary data
-    fi_df : pd.DataFrame
-        Current Fusion Inspector data
     arriba_df : pd.DataFrame
         Current Arriba data
     prev_pos : pd.DataFrame
@@ -370,11 +367,14 @@ def make_sf_pivot(
 
     # Merge Arriba data
     if not arriba_df.empty:
-        arriba_df["LEFTRIGHT"] = arriba_df["breakpoint1"] + "_" + arriba_df["breakpoint2"]
-        df["LEFTRIGHT"] = (
-            df["LeftBreakpoint"].str.replace(r":[+-]$", "", regex=True)
+        arriba_df["LEFTRIGHT"] = (
+            arriba_df["breakpoint1"]
+            + ":"
+            + arriba_df["strand1(gene/fusion)"].str.split("/").str[1]
             + "_"
-            + df["RightBreakpoint"].str.replace(r":[+-]$", "", regex=True)
+            + arriba_df["breakpoint2"]
+            + ":"
+            + arriba_df["strand2(gene/fusion)"].str.split("/").str[1]
         )
         df = df.merge(
             arriba_df[["LEFTRIGHT", "reading_frame"]], on="LEFTRIGHT", how="left"

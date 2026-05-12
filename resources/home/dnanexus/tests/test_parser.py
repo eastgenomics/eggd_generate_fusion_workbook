@@ -159,8 +159,8 @@ class TestMakeSfPivot:
         cls.sf_df = pd.DataFrame(
             {
                 "#FusionName": ["A--B"],
-                "LeftBreakpoint": ["chr1:123"],
-                "RightBreakpoint": ["chr2:456"],
+                "LeftBreakpoint": ["chr1:123:+"],
+                "RightBreakpoint": ["chr2:456:+"],
                 "file_name": ["123-2XX-ABC"],
                 "JunctionReadCount": [100],
                 "SpanningFragCount": [200],
@@ -182,18 +182,12 @@ class TestMakeSfPivot:
             }
         )
 
-        cls.fi_df = pd.DataFrame(
-            {
-                "LeftBreakpoint": ["chr1:123"],
-                "RightBreakpoint": ["chr2:456"],
-                "PROT_FUSION_TYPE": ["in-frame"],
-            }
-        )
-
         cls.arriba_df = pd.DataFrame(
             {
                 "breakpoint1": ["chr1:123"],
+                "strand1(gene/fusion)": ["+/+"],
                 "breakpoint2": ["chr2:456"],
+                "strand2(gene/fusion)": ["+/+"],
                 "reading_frame": ["in-frame"],
             }
         )
@@ -233,7 +227,6 @@ class TestMakeSfPivot:
             cls.sf_df,
             cls.sf_runs_df,
             cls.fastqc_pivot_df,
-            cls.fi_df,
             cls.arriba_df,
             cls.prev_pos,
             cls.ref_sources,
