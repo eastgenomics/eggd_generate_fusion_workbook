@@ -70,6 +70,8 @@ def main(
         List of dictionaries containing DXLinks to Arriba output files
     multiqc_files : List[dict]
         List of dictionaries containing DXLinks to MultiQC output files
+    mosdepth_files : List[dict]
+    List of dictionaries containing DXLinks to Mosdepth output files
     SF_previous_runs_data : dict
        Mapping of DXLink to STAR-Fusion previous runs data file
     reference_sources : dict
