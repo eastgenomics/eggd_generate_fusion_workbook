@@ -1,8 +1,7 @@
-"""general and I/O utilities
-"""
+"""general and I/O utilities"""
 
-import re
 import os
+import re
 from urllib.parse import quote
 
 import dxpy
@@ -145,10 +144,14 @@ def validate_config(config: dict, expected_keys: list):
     """
     missing_keys = [key for key in expected_keys if key not in config]
     if missing_keys:
-        raise ValueError(f"Missing required config key(s): {', '.join(missing_keys)}")
+        raise ValueError(
+            f"Missing required config key(s): {', '.join(missing_keys)}"
+        )
 
 
-def get_dxfile(files: list[dxpy.DXDataObject], target_name: str) -> dxpy.DXDataObject:
+def get_dxfile(
+    files: list[dxpy.DXDataObject], target_name: str
+) -> dxpy.DXDataObject:
     """Finds a DXDataObject in the given list that matches the specified filename.
 
     Parameters

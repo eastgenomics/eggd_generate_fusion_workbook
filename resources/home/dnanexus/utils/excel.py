@@ -1,9 +1,15 @@
-"""utilities for formating summary sheet
-"""
+"""utilities for formating summary sheet"""
 
 import openpyxl
 import pandas as pd
-from openpyxl.styles import PatternFill, Border, Side, Alignment, DEFAULT_FONT, Font
+from openpyxl.styles import (
+    DEFAULT_FONT,
+    Alignment,
+    Border,
+    Font,
+    PatternFill,
+    Side,
+)
 from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -48,7 +54,9 @@ def add_extra_columns(
     for i, (col, formula) in enumerate(extra_cols.items(), start=start_col):
         worksheet.cell(row=1, column=i, value=col)
         for row in range(2, end_row + 1):
-            worksheet.cell(row=row, column=i, value=formula.replace("{row}", str(row)))
+            worksheet.cell(
+                row=row, column=i, value=formula.replace("{row}", str(row))
+            )
 
 
 def apply_header_format(worksheet: Worksheet) -> None:
@@ -99,7 +107,9 @@ def adjust_column_widths(
                 _max = max(_max, len(str(val)))
 
         # Set column width with a cap of max_width
-        worksheet.column_dimensions[col_letter].width = min(_max + 2, max_width)
+        worksheet.column_dimensions[col_letter].width = min(
+            _max + 2, max_width
+        )
 
 
 def set_tab_color(worksheet: Worksheet, hex_color: str) -> None:
@@ -249,7 +259,9 @@ def align_column_cells(
             cell.alignment = alignment
 
 
-def set_column_width(worksheet: Worksheet, col_letter: str, width: float) -> None:
+def set_column_width(
+    worksheet: Worksheet, col_letter: str, width: float
+) -> None:
     """
     Set fixed width for a specified column.
     For columns needing specific adjustment.
@@ -265,7 +277,10 @@ def set_column_width(worksheet: Worksheet, col_letter: str, width: float) -> Non
     """
     worksheet.column_dimensions[col_letter].width = width
 
-def set_column_font_colour(worksheet: Worksheet, col_letter: str, hex_color: str) -> None:
+
+def set_column_font_colour(
+    worksheet: Worksheet, col_letter: str, hex_color: str
+) -> None:
     """
     Set colour for a specified column.
     For columns needing specific colours.
@@ -361,7 +376,9 @@ def add_drop_down_col(
     set_column_width(ws, col_letter, width=col_width + 2)
 
 
-def add_hyperlink(cell: openpyxl.cell.cell.Cell, url: str, text: str = None) -> None:
+def add_hyperlink(
+    cell: openpyxl.cell.cell.Cell, url: str, text: str = None
+) -> None:
     """
     Add Excel hyperlink formula to cell
 
@@ -383,7 +400,10 @@ def add_hyperlink(cell: openpyxl.cell.cell.Cell, url: str, text: str = None) -> 
 
 def add_breakpoint_hyperlinks(
     writer: pd.ExcelWriter,
-    breakpoint_columns: tuple[str, str] = ("leftbreakpoint", "rightbreakpoint"),
+    breakpoint_columns: tuple[str, str] = (
+        "leftbreakpoint",
+        "rightbreakpoint",
+    ),
     header_row: int = 1,
 ) -> None:
     """
@@ -409,7 +429,8 @@ def add_breakpoint_hyperlinks(
             for col in range(1, max_col + 1)
         ]
         headers = [
-            col.strip().lower() if isinstance(col, str) else "" for col in headers
+            col.strip().lower() if isinstance(col, str) else ""
+            for col in headers
         ]
 
         for bp_col in breakpoint_columns:
@@ -482,7 +503,9 @@ def drop_column(worksheet: Worksheet, col_name: str) -> bool:
     return True
 
 
-def rotate_headers(sheet: Worksheet, header_row: int = 1, degree: int = 90) -> None:
+def rotate_headers(
+    sheet: Worksheet, header_row: int = 1, degree: int = 90
+) -> None:
     """Rotates values in header row by given degree (90 -- vertically).
 
     Parameters
@@ -494,7 +517,9 @@ def rotate_headers(sheet: Worksheet, header_row: int = 1, degree: int = 90) -> N
     degree : int, optional
         The degree of rotation to apply (0-180), by default 90
     """
-    alignment = Alignment(textRotation=degree, vertical="bottom", horizontal="center")
+    alignment = Alignment(
+        textRotation=degree, vertical="bottom", horizontal="center"
+    )
     for col in range(1, sheet.max_column + 1):
         cell = sheet.cell(row=header_row, column=col)
         cell.alignment = alignment

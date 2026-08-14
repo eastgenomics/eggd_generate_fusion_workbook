@@ -6,7 +6,6 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 from typing import List
 
-import dxpy
 import pandas as pd
 from dxpy import DXDataObject
 
@@ -137,12 +136,16 @@ def parse_fastqc(dxfile: DXDataObject) -> pd.DataFrame:
     required_cols = ["total_deduplicated_percentage", "Total Sequences"]
     missing_cols = [col for col in required_cols if col not in df.columns]
     if missing_cols:
-        raise ValueError(f"Required columns missing from FastQC data: {missing_cols}")
+        raise ValueError(
+            f"Required columns missing from FastQC data: {missing_cols}"
+        )
 
     df["Unique Reads"] = (
         (df["total_deduplicated_percentage"] / 100.0) * df["Total Sequences"]
     ).astype(int)
-    df["Duplicate Reads"] = (df["Total Sequences"] - df["Unique Reads"]).astype(int)
+    df["Duplicate Reads"] = (
+        df["Total Sequences"] - df["Unique Reads"]
+    ).astype(int)
     df["Unique Reads(M)"] = df["Unique Reads"] / 1_000_000
     df["Duplicate Reads(M)"] = df["Duplicate Reads"] / 1_000_000
     df = df[
@@ -265,6 +268,7 @@ def parse_star_fusion(dxfiles: List[DXDataObject]) -> pd.DataFrame:
     # same as above; to allow further customisation per tool as needed.
     return _parse_fusion_files(dxfiles)
 
+
 def parse_arriba(dxfiles: List[DXDataObject]) -> pd.DataFrame:
     """
     Reads and concatenates an array of DNAnexus  Arriba files.
@@ -282,6 +286,7 @@ def parse_arriba(dxfiles: List[DXDataObject]) -> pd.DataFrame:
     """
     # same as above; to allow further customisation per tool as needed.
     return _parse_fusion_files(dxfiles)
+
 
 def parse_prev_pos(dxfile: DXDataObject) -> pd.DataFrame:
     """Parse the content of previous_positives data and modify Fusion column
@@ -367,9 +372,13 @@ def make_sf_pivot(
 
     # Merge Fusion Inspector data
     if not fi_df.empty:
-        fi_df["LEFTRIGHT"] = fi_df["LeftBreakpoint"] + "_" + fi_df["RightBreakpoint"]
+        fi_df["LEFTRIGHT"] = (
+            fi_df["LeftBreakpoint"] + "_" + fi_df["RightBreakpoint"]
+        )
         df = df.merge(
-            fi_df[["LEFTRIGHT", "PROT_FUSION_TYPE"]], on="LEFTRIGHT", how="left"
+            fi_df[["LEFTRIGHT", "PROT_FUSION_TYPE"]],
+            on="LEFTRIGHT",
+            how="left",
         ).rename(columns={"PROT_FUSION_TYPE": "FRAME"})
 
     # add prev positives
@@ -396,7 +405,9 @@ def make_sf_pivot(
     df["ReferenceSources"] = df["ReferenceSources"].fillna("")
 
     # Create final pivot table
-    df = df.sort_values(by=["FFPM"], na_position="first").reset_index(drop=True)
+    df = df.sort_values(by=["FFPM"], na_position="first").reset_index(
+        drop=True
+    )
     pivot_df = (
         df.groupby(pivot_config["index"], dropna=False)[pivot_config["values"]]
         .first()

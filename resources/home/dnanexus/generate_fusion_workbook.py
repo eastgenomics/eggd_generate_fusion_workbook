@@ -2,8 +2,8 @@
 # eggd_generate_fusion_workbook 1.0.0
 
 import os
-from glob import glob
 import subprocess
+from glob import glob
 from typing import List
 
 if os.path.exists("/home/dnanexus"):
@@ -13,36 +13,35 @@ if os.path.exists("/home/dnanexus"):
     )
 
 import dxpy
-import openpyxl
 import pandas as pd
 from utils.defaults import (
+    ARRIBA_SHEET_CONFIG,
     EPIC_SHEET_CONFIG,
+    FASTQC_PIVOT_CONFIG,
     FASTQC_SHEET_CONFIG,
     FI_SHEET_CONFIG,
-    ARRIBA_SHEET_CONFIG,
-    SF_PREVIOUS_RUNS_SHEET_CONFIG,
-    SF_SHEET_CONFIG,
-    FASTQC_PIVOT_CONFIG,
-    SF_PIVOT_CONFIG,
     PREV_POS_SHEET_CONFIG,
     REF_SOURCES_SHEET_CONFIG,
+    SF_PIVOT_CONFIG,
+    SF_PREVIOUS_RUNS_SHEET_CONFIG,
+    SF_SHEET_CONFIG,
 )
-from utils.excel import format_workbook, write_df_to_sheet, add_extra_columns
+from utils.excel import format_workbook, write_df_to_sheet
 from utils.parser import (
-    parse_fastqc,
-    parse_fusion_inspector,
-    parse_star_fusion,
-    parse_arriba,
     make_fastqc_pivot,
     make_sf_pivot,
-    parse_sf_previous,
+    parse_arriba,
+    parse_fastqc,
+    parse_fusion_inspector,
     parse_prev_pos,
+    parse_sf_previous,
+    parse_star_fusion,
 )
 from utils.summary_sheet import write_summary
 from utils.utils import (
+    get_dxfile,
     get_project_info,
     read_dxfile,
-    get_dxfile,
 )
 
 
@@ -83,7 +82,9 @@ def main(
     """
     # Initialize inputs into dxpy.DXDataObject instances
     starfusion_files = [dxpy.DXFile(item) for item in starfusion_files]
-    fusioninspector_files = [dxpy.DXFile(item) for item in fusioninspector_files]
+    fusioninspector_files = [
+        dxpy.DXFile(item) for item in fusioninspector_files
+    ]
     arriba_files = [dxpy.DXFile(item) for item in arriba_files]
     multiqc_files = [dxpy.DXFile(item) for item in multiqc_files]
     fastqc_data = get_dxfile(multiqc_files, "multiqc_fastqc.txt")
@@ -114,7 +115,9 @@ def main(
         write_df_to_sheet(writer, df_prev_pos, **PREV_POS_SHEET_CONFIG)
 
         # Add SF previous runs data
-        write_df_to_sheet(writer, df_sf_previous, **SF_PREVIOUS_RUNS_SHEET_CONFIG)
+        write_df_to_sheet(
+            writer, df_sf_previous, **SF_PREVIOUS_RUNS_SHEET_CONFIG
+        )
 
         # Add FastQC data
         write_df_to_sheet(writer, df_fastqc, **FASTQC_SHEET_CONFIG)

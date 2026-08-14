@@ -1,23 +1,22 @@
-"""Utilities for formating summary sheet
-"""
+"""Utilities for formating summary sheet"""
 
 import openpyxl
 import pandas as pd
-from openpyxl.styles import PatternFill, Border, Side, Alignment
+from openpyxl.styles import Alignment
 from openpyxl.worksheet.worksheet import Worksheet
 
 from .excel import (
-    alternate_specimen_colors,
-    highlight_specimen_borders,
-    style_borders,
-    set_column_width,
-    set_column_font_colour,
-    align_column_cells,
     add_drop_down_col,
-    get_col_letter,
-    write_df_to_sheet,
+    align_column_cells,
+    alternate_specimen_colors,
     drop_column,
+    get_col_letter,
+    highlight_specimen_borders,
     rotate_headers,
+    set_column_font_colour,
+    set_column_width,
+    style_borders,
+    write_df_to_sheet,
 )
 from .utils import validate_config
 
@@ -101,7 +100,9 @@ def add_lookup_columns(
         merged_rows.update(range(r.min_row, r.max_row + 1))
 
     # Process each new column
-    for col_offset, (header, formula_template) in enumerate(cols.items(), start=1):
+    for col_offset, (header, formula_template) in enumerate(
+        cols.items(), start=1
+    ):
         new_col_idx = spec_col_idx + col_offset
         new_col = openpyxl.utils.get_column_letter(new_col_idx)
 
@@ -118,7 +119,9 @@ def add_lookup_columns(
 
             # Apply formula to first cell
             formula = formula_template.replace("{row}", str(start))
-            new_cell = worksheet.cell(row=start, column=new_col_idx, value=formula)
+            new_cell = worksheet.cell(
+                row=start, column=new_col_idx, value=formula
+            )
             new_cell.alignment = Alignment(vertical="top")
 
             # Clear other merged cells (they inherit from first cell)
@@ -129,7 +132,9 @@ def add_lookup_columns(
         for row in range(2, worksheet.max_row + 1):
             if row not in merged_rows:
                 formula = formula_template.replace("{row}", str(row))
-                cell = worksheet.cell(row=row, column=new_col_idx, value=formula)
+                cell = worksheet.cell(
+                    row=row, column=new_col_idx, value=formula
+                )
 
 
 def format_summary_sheet(
