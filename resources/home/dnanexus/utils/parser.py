@@ -438,7 +438,10 @@ def parse_mosdepth(dxfiles: list) -> pd.DataFrame:
 
     max_workers = min(4, len(dxfiles))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = [executor.submit(read_dxfile, dxfile) for dxfile in dxfiles]
+        futures = [
+            executor.submit(read_dxfile, dxfile, **{"gzipped": True})
+            for dxfile in dxfiles
+        ]
         results = []
         for future in futures:
             try:
@@ -451,7 +454,5 @@ def parse_mosdepth(dxfiles: list) -> pd.DataFrame:
             return pd.DataFrame()
 
         df = pd.concat(results)
-
-    print(df)
 
     return df
