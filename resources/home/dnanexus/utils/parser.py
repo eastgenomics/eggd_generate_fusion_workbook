@@ -430,3 +430,28 @@ def make_sf_pivot(
     ]
 
     return pivot_df
+
+
+def parse_mosdepth(dxfiles: list) -> pd.DataFrame:
+    if not dxfiles:
+        return pd.DataFrame()
+
+    max_workers = min(4, len(dxfiles))
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = [executor.submit(read_dxfile, dxfile) for dxfile in dxfiles]
+        results = []
+        for future in futures:
+            try:
+                results.append(future.result())
+            except Exception as e:
+                # Log the error and continue with other files
+                print(f"Error processing file: {e}")
+
+        if not results:
+            return pd.DataFrame()
+
+        df = pd.concat(results)
+
+    print(df)
+
+    return df
