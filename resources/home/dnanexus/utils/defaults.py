@@ -164,3 +164,9 @@ SF_PIVOT_CONFIG = {
     "col_widths": {"D": 6, "E": 10, "F": 10, "J": 6, "K": 6, "L": 6, "M": 24, "N": 24},
     "col_colors": {"L": "780373", "M": "01982f", "N": "01982f"}
 }
+
+
+ALK_ATI_SHEET_CONFIG = {
+    "sheet_name": "ALK^ATI",
+    "tab_color": "5534eb",
+}
