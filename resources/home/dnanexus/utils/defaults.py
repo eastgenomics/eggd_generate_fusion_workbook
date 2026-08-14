@@ -25,7 +25,6 @@ SF_SHEET_CONFIG = {
         "Duplicate Reads(M)": "=VLOOKUP(A{row},'FastQC_Pivot'!A:B,2,0)",
         "ID": '=CONCATENATE(A{row},"_",L{row})',
         "LEFTRIGHT": '=CONCATENATE(S{row},"_",U{row})',
-        "FRAME": "=VLOOKUP(I{row},'Fusion_Inspector'!C:AM,32,0)",
     },
     "col_widths": {"K": 10},
 }

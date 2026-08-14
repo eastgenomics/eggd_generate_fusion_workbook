@@ -1,15 +1,15 @@
 # eggd_generate_fusion_workbook (DNAnexus Platform App)
 
 ## What does this app do?
-Collates Fusion candidates and associated metadata from STAR-Fusion, FusionInspector and FastQC per run, then formats and generate a fusion workbook with collated data
+Collates fusion candidates and associated metadata from STAR-Fusion, Arriba and FastQC per run, then formats and generates a fusion workbook with collated data
 
 ## What inputs are required for this app to run?
 - `-istarfusion_files` : An array of DNAnexus file IDs of STAR-Fusion's prediction files
-- `-ifusioninspector_files` : An array of DNAnexus file IDs of FusionInspector's output files
+- `-ifusioninspector_files` *(optional)*: An array of DNAnexus file IDs of FusionInspector's output files. If provided, the FusionInspector sheet will be included in the workbook
 - `-iarriba_files`: An array of DNAnexus file IDs of Arriba output fusion files from STAR aligned BAMs
 - `-imultiqc_files`: An array of DNAnexus file IDs of MultiQC output metrics file
 - `-iSF_previous_runs_data` : The DNAnexus file ID of a static file containing historical STAR-Fusion data
-- `ireference_sources` : The DNAnexus file ID of a static file containing aggregated data source from COSMIC, FusionDGB2 and ChimerDB
+- `-ireference_sources` : The DNAnexus file ID of a static file containing aggregated data source from COSMIC, FusionDGB2 and ChimerDB
 - `iprevious_positives`: The DNAnexus file ID of a static file containing previously reported fusions
 
 ## How does this app work?
@@ -30,7 +30,7 @@ python3 scripts/generate_inputs.py -p <project_id>
 The above will write the file `input.json` which can then be passed to the `dx run` command below.
 
 ```
-dx run eggd_eggd_generate_fusion_workbook/1.1.0 \
+dx run eggd_eggd_generate_fusion_workbook/1.2.0 \
 -f input.json \
 --destination {}
 ```

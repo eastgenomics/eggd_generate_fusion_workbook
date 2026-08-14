@@ -308,7 +308,7 @@ def make_sf_pivot(
     sf_df: pd.DataFrame,
     sf_runs_df: pd.DataFrame,
     fastqc_pivot_df: pd.DataFrame,
-    fi_df: pd.DataFrame,
+    arriba_df: pd.DataFrame,
     prev_pos: pd.DataFrame,
     ref_sources: pd.DataFrame,
     pivot_config: dict,
@@ -323,8 +323,8 @@ def make_sf_pivot(
         Historical STAR-Fusion data
     fastqc_pivot_df : pd.DataFrame
         FastQC summary data
-    fi_df : pd.DataFrame
-        Current Fusion Inspector data
+    arriba_df : pd.DataFrame
+        Current Arriba data
     prev_pos : pd.DataFrame
         Previously reported Fusions
     ref_sources : pd.DataFrame
@@ -365,12 +365,21 @@ def make_sf_pivot(
     if not fastqc_pivot_df.empty:
         df = df.merge(fastqc_pivot_df, on="SPECIMEN", how="left")
 
-    # Merge Fusion Inspector data
-    if not fi_df.empty:
-        fi_df["LEFTRIGHT"] = fi_df["LeftBreakpoint"] + "_" + fi_df["RightBreakpoint"]
+    # Merge Arriba data
+    if not arriba_df.empty:
+        arriba_df["LEFTRIGHT"] = (
+            arriba_df["breakpoint1"]
+            + ":"
+            + arriba_df["strand1(gene/fusion)"].str.split("/").str[1]
+            + "_"
+            + arriba_df["breakpoint2"]
+            + ":"
+            + arriba_df["strand2(gene/fusion)"].str.split("/").str[1]
+        )
         df = df.merge(
-            fi_df[["LEFTRIGHT", "PROT_FUSION_TYPE"]], on="LEFTRIGHT", how="left"
-        ).rename(columns={"PROT_FUSION_TYPE": "FRAME"})
+            arriba_df[["LEFTRIGHT", "reading_frame"]], on="LEFTRIGHT", how="left"
+        ).rename(columns={"reading_frame": "FRAME"})
+
 
     # add prev positives
     prev_pos = (
@@ -403,19 +412,20 @@ def make_sf_pivot(
         .sort_values(by=["SPECIMEN", "LEFTRIGHT"], na_position="first")
     )
 
-    pivot_df = pivot_df[
-        [
-            "LeftBreakpoint",
-            "#FusionName",
-            "RightBreakpoint",
-            "JunctionReadCount",
-            "SpanningFragCount",
-            "Count_predicted",
-            "ReferenceSources",
-            "PreviousPositives",
-            "FRAME",
-            "FFPM",
-        ]
+    cols = [
+        "LeftBreakpoint",
+        "#FusionName",
+        "RightBreakpoint",
+        "JunctionReadCount",
+        "SpanningFragCount",
+        "Count_predicted",
+        "ReferenceSources",
+        "PreviousPositives",
     ]
+    if "FRAME" in pivot_df.columns:
+        cols.append("FRAME")
+    cols.append("FFPM")
+
+    pivot_df = pivot_df[cols]
 
     return pivot_df
