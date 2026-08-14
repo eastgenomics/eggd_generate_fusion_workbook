@@ -463,7 +463,7 @@ def parse_mosdepth(dxfiles: list) -> pd.DataFrame:
     )
     ratio = pivot["ati_region"] / pivot["exon_20"]
 
-    df["ratio"] = df["file_name"].map(ratio)
-    df.loc[df[3] != "exon_20", "ratio"] = pd.NA
+    df["ratio ati/exon_20"] = df["file_name"].map(ratio)
+    df.loc[df[3] != "exon_20", "ratio ati/exon_20"] = pd.NA
 
     return df
