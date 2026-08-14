@@ -71,7 +71,7 @@ def main(
     multiqc_files : List[dict]
         List of dictionaries containing DXLinks to MultiQC output files
     mosdepth_files : List[dict]
-    List of dictionaries containing DXLinks to Mosdepth output files
+        List of dictionaries containing DXLinks to Mosdepth output files
     SF_previous_runs_data : dict
        Mapping of DXLink to STAR-Fusion previous runs data file
     reference_sources : dict
@@ -100,7 +100,9 @@ def main(
     df_fusioninspector = parse_fusion_inspector(fusioninspector_files)
     df_arriba = parse_arriba(arriba_files)
     df_fastqc = parse_fastqc(fastqc_data)
-    df_mosdepth = parse_mosdepth(mosdepth_files)
+    df_mosdepth = parse_mosdepth(
+        [dxpy.DXFile(file).id for file in mosdepth_files]
+    )
     df_sf_previous = parse_sf_previous(sf_previous_data)
     df_ref_sources = read_dxfile(ref_sources, include_fname=False)
     df_prev_pos = parse_prev_pos(previous_positives)
