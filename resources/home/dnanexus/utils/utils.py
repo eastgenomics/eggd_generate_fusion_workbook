@@ -1,5 +1,6 @@
 """general and I/O utilities"""
 
+import gzip
 import os
 import re
 from urllib.parse import quote
@@ -13,6 +14,7 @@ def read_dxfile(
     dxfile: DXDataObject,
     sep: str = "\t",
     include_fname: bool = True,
+    gzipped: bool = False,
 ) -> pd.DataFrame:
     """reads a DNAnexus file object into a pandas dataframe
 
@@ -24,6 +26,8 @@ def read_dxfile(
         Delimeter of data values in files. Defaults to  "\t"
     include_fname : bool
         Specifies whether to set file name as first column. Defaults to True
+    gzipped: bool
+        Alternate mode to process data if it is gzipped. Defaults to False
 
     Returns
     -------
@@ -31,19 +35,29 @@ def read_dxfile(
         An instance of DataFrame with file content
     """
 
-    df = pd.read_csv(dxfile, sep=sep)
+    if gzipped:
+        dxfile = dxpy.open_dxfile(dxfile, mode="rb")
+
+        with gzip.GzipFile(fileobj=dxfile) as f:
+            data = [line.decode().strip().split("\t") for line in f]
+
+        df = pd.DataFrame(data)
+
+    else:
+        df = pd.read_csv(dxfile, sep=sep)
 
     if include_fname:
         fname = dxfile.name
         df.insert(0, "file_name", fname)
 
-        # add a blank row with file name;
-        # useful for samples with no fusion and for filtering excel
-        dummy_row = pd.DataFrame(
-            [[fname] + [pd.NA] * (df.shape[1] - 1)], columns=df.columns
-        )
+        if not gzipped:
+            # add a blank row with file name;
+            # useful for samples with no fusion and for filtering excel
+            dummy_row = pd.DataFrame(
+                [[fname] + [pd.NA] * (df.shape[1] - 1)], columns=df.columns
+            )
 
-        df = pd.concat([dummy_row, df], ignore_index=True)
+            df = pd.concat([dummy_row, df], ignore_index=True)
 
     return df
 
