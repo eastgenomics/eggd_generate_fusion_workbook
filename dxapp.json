@@ -34,6 +34,13 @@
         "help": "MultiQC output files containing quality metrics for the sequencing data"
       },
       {
+        "name": "mosdepth_files",
+        "label": "mosdepth_files",
+        "class": "array:file",
+        "optional": true,
+        "help": "Mosdepth bed files created using the ALK ATI bed region file"
+      },
+      {
         "name": "SF_previous_runs_data",
         "class": "file",
         "optional": false,
@@ -92,4 +99,3 @@
     "developers": ["org-emee_1"],
     "authorizedUsers": ["org-emee_1"]
   }
-  
