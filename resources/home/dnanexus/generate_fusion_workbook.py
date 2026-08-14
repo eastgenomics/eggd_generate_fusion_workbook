@@ -15,6 +15,7 @@ if os.path.exists("/home/dnanexus"):
 import dxpy
 import pandas as pd
 from utils.defaults import (
+    ALK_ATI_SHEET_CONFIG,
     ARRIBA_SHEET_CONFIG,
     EPIC_SHEET_CONFIG,
     FASTQC_PIVOT_CONFIG,
@@ -154,6 +155,7 @@ def main(
             df_ref_sources,
             SF_PIVOT_CONFIG,
         )
+        write_df_to_sheet(writer, df_mosdepth, **ALK_ATI_SHEET_CONFIG)
         write_summary(writer, sf_pivot, SF_PIVOT_CONFIG)
         format_workbook(writer)
 
