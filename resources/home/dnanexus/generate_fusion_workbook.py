@@ -33,6 +33,7 @@ from utils.parser import (
     parse_arriba,
     parse_fastqc,
     parse_fusion_inspector,
+    parse_mosdepth,
     parse_prev_pos,
     parse_sf_previous,
     parse_star_fusion,
@@ -51,6 +52,7 @@ def main(
     fusioninspector_files: List[dict],
     arriba_files: List[dict],
     multiqc_files: List[dict],
+    mosdepth_files: List[dict],
     SF_previous_runs_data: dict,
     reference_sources: dict,
     previous_positives: dict,
@@ -96,6 +98,7 @@ def main(
     df_fusioninspector = parse_fusion_inspector(fusioninspector_files)
     df_arriba = parse_arriba(arriba_files)
     df_fastqc = parse_fastqc(fastqc_data)
+    df_mosdepth = parse_mosdepth(mosdepth_files)
     df_sf_previous = parse_sf_previous(sf_previous_data)
     df_ref_sources = read_dxfile(ref_sources, include_fname=False)
     df_prev_pos = parse_prev_pos(previous_positives)
