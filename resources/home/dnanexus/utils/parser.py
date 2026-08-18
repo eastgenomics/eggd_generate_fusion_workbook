@@ -456,14 +456,14 @@ def parse_mosdepth(dxfiles: list) -> pd.DataFrame:
         df = pd.concat(results)
 
     # compute ratio of coverage for ati region by coverage for exon 20
-    df[4] = pd.to_numeric(df[4], errors="coerce")
+    df["coverage"] = pd.to_numeric(df["coverage"], errors="coerce")
 
     pivot = df.pivot_table(
-        index="file_name", columns=3, values=4, aggfunc="first"
+        index="file_name", columns="region", values="coverage", aggfunc="first"
     )
     ratio = pivot["ati_region"] / pivot["exon_20"]
 
     df["ratio"] = df["file_name"].map(ratio)
-    df.loc[df[3] != "exon_20", "ratio"] = pd.NA
+    df.loc[df["region"] != "exon_20", "ratio"] = pd.NA
 
     return df
