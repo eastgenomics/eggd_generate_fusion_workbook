@@ -41,7 +41,9 @@ def read_dxfile(
         with gzip.GzipFile(fileobj=dxfile) as f:
             data = [line.decode().strip().split("\t") for line in f]
 
-        df = pd.DataFrame(data)
+        df = pd.DataFrame(
+            data, columns=["chr", "start", "end", "region", "coverage"]
+        )
 
     else:
         df = pd.read_csv(dxfile, sep=sep)
