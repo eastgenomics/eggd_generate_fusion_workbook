@@ -16,17 +16,17 @@ SF_SHEET_CONFIG = {
     "sheet_name": "STAR-Fusion",
     "tab_color": "CFBF30",
     "extra_cols": {
-        "SPECIMEN": "=MID(K{row},11,10)",
-        "FNAME": "=LEFT(K{row},28)",
-        "Count_predicted": "=VLOOKUP(L{row},'SF_Previous_Runs'!A:B,2,0)",
+        "SPECIMEN": "=MID(J{row},11,10)",
+        "FNAME": "=LEFT(J{row},28)",
+        "Count_predicted": "=VLOOKUP(K{row},'SF_Previous_Runs'!A:B,2,0)",
         "EPIC": "=VLOOKUP(A{row},'EPIC'!AJ:AK,2,0)",
         "DAYS COUNT": "=VLOOKUP(A{row},'EPIC'!AJ:AL,3,0)",
         "Unique Reads(M)": "=VLOOKUP(A{row},'FastQC_Pivot'!A:C,3,0)",
         "Duplicate Reads(M)": "=VLOOKUP(A{row},'FastQC_Pivot'!A:B,2,0)",
-        "ID": '=CONCATENATE(A{row},"_",L{row})',
-        "LEFTRIGHT": '=CONCATENATE(S{row},"_",U{row})',
+        "ID": '=CONCATENATE(A{row},"_",K{row})',
+        "LEFTRIGHT": '=CONCATENATE(R{row},"_",T{row})',
     },
-    "col_widths": {"K": 10},
+    "col_widths": {"J": 10},
 }
 
 FI_SHEET_CONFIG = {
