@@ -6,7 +6,6 @@ import json
 import dxpy
 
 SF_PATTERN = "*star-fusion.fusion_predictions.abridged.tsv"
-FI_PATTERN = "*FusionInspector*.coding_effect*"
 ARRIBA_PATTERN = "*_fusions.tsv"
 MQC_PATTERN = "multiqc_*"
 
@@ -55,12 +54,11 @@ def main() -> None:
 
     inputs = {
         "starfusion_files": find_files(project_id, SF_PATTERN),
-        "fusioninspector_files": find_files(project_id, FI_PATTERN),
         "arriba_files": find_files(project_id, ARRIBA_PATTERN),
         "multiqc_files": find_files(project_id, MQC_PATTERN),
-        "SF_previous_runs_data": {"$dnanexus_link": "file-J18X5qj48F3V951v176vBq90"},
+        "SF_previous_runs_data": {"$dnanexus_link": "file-J6j4Fqj44Kkg9vYKYp2ZJZ3G"},
         "reference_sources": {"$dnanexus_link": "file-J18490j48F3b2zB4Z27KJJk4"},
-        "previous_positives": {"$dnanexus_link": "file-J0fqQ8848F3bfj1XjfBQbx8x"},
+        "previous_positives": {"$dnanexus_link": "file-J753pPQ44KkgG0B26fxGyXg3"},
     }
 
     with open("input.json", "w") as file:
