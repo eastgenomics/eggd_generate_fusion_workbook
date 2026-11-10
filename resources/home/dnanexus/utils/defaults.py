@@ -100,7 +100,7 @@ FASTQC_PIVOT_CONFIG = {
     "start_col": 4,
 }
 
-SF_PIVOT_CONFIG = {
+SF_SUMMARY_CONFIG = {
     "index": [
         "Filename",
         "SPECIMEN",
@@ -162,4 +162,51 @@ SF_PIVOT_CONFIG = {
     },
     "col_widths": {"D": 6, "E": 10, "F": 10, "J": 6, "K": 6, "L": 6, "M": 24, "N": 24},
     "col_colors": {"L": "780373", "M": "01982f", "N": "01982f"}
+}
+
+ARRIBA_SUMMARY_CONFIG = {
+    "index": [
+        "Filename",
+        "SPECIMEN",
+        "Unique Reads(M)",
+        "Duplicate Reads(M)",
+        "LEFTRIGHT",
+    ],
+    "columns": None,
+    "values": [
+        "breakpoint1",
+        "#gene1",
+        "gene2",
+        "breakpoint2",
+        "split_reads1",
+        "split_reads2",
+        "discordant_mates",
+        "ReferenceSources",
+        "PreviousPositives",
+        "reading_frame",
+        "confidence",
+    ],
+    "aggfunc": {
+        "breakpoint1": "first",
+        "#gene1": "first",
+        "gene2": "first",
+        "breakpoint2": "first",
+        "split_reads1": "first",
+        "split_reads2": "first",
+        "discordant_mates": "first",
+        "ReferenceSources": "first",
+        "PreviousPositives": "first",
+        "reading_frame": "first",
+        "confidence": "first",
+    },
+    "sheet_name": "Arriba_Summary",
+    "tab_color": "069a2e",
+    "stop_col": "confidence",
+    "drop_downs": {},
+    "extra_cols": {
+        "EPIC": "=VLOOKUP(B{row},'EPIC'!AJ:AK,2,0)",
+        "DAYS COUNT": "=VLOOKUP(B{row},'EPIC'!AJ:AL,3,0)",
+    },
+    "col_widths": {},
+    "col_colors": {},
 }

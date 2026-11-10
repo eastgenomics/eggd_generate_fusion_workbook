@@ -150,8 +150,8 @@ class TestParseFusion:
             )
 
 
-class TestMakeSfPivot:
-    """Unit tests for final pivot table from multiple data sources."""
+class TestMakeSfSummary:
+    """Unit tests for final summary table from multiple data sources."""
 
     @classmethod
     def setup_class(cls):
@@ -206,7 +206,7 @@ class TestMakeSfPivot:
             }
         )
 
-        cls.pivot_config = {
+        cls.summary_config = {
             "index": ["SPECIMEN", "LEFTRIGHT"],
             "columns": None,
             "values": [
@@ -223,44 +223,44 @@ class TestMakeSfPivot:
             ],
         }
 
-        cls.result = parser.make_sf_pivot(
+        cls.result = parser.make_sf_summary(
             cls.sf_df,
             cls.sf_runs_df,
             cls.fastqc_pivot_df,
             cls.arriba_df,
             cls.prev_pos,
             cls.ref_sources,
-            cls.pivot_config,
+            cls.summary_config,
         )
 
-    def test_pivot_is_not_empty(self):
-        assert not self.result.empty, "Pivot result is empty"
+    def test_summary_is_not_empty(self):
+        assert not self.result.empty, "Summary result is empty"
 
-    def test_pivot_has_correct_index(self):
+    def test_summary_has_correct_index(self):
         assert isinstance(self.result.index, pd.MultiIndex), "Index is not MultiIndex"
         assert (
-            list(self.result.index.names) == self.pivot_config["index"]
+            list(self.result.index.names) == self.summary_config["index"]
         ), "Index names mismatch"
 
-    def test_pivot_has_all_expected_columns(self):
-        for col in self.pivot_config["values"]:
+    def test_summary_has_all_expected_columns(self):
+        for col in self.summary_config["values"]:
             assert col in self.result.columns, f"Missing column: {col}"
 
-    def test_pivot_shape_is_expected(self):
+    def test_summary_shape_is_expected(self):
         assert self.result.shape == (
             1,
-            len(self.pivot_config["values"]),
+            len(self.summary_config["values"]),
         ), f"Unexpected shape: {self.result.shape}"
 
-    def test_pivot_contains_correct_values(self):
+    def test_summary_contains_correct_values(self):
         row = self.result.iloc[0]
         assert row["#FusionName"] == "A--B"
         assert row["FRAME"] == "in-frame"
         assert row["ReferenceSources"] == "ChimerKDB"
 
 
-class TestMakeSfPivotNoArriba:
-    """Unit tests for make_sf_pivot when arriba_df is empty (no FRAME column)."""
+class TestMakeSfSummaryNoArriba:
+    """Unit tests for make_sf_summary when arriba_df is empty (no FRAME column)."""
 
     @classmethod
     def setup_class(cls):
@@ -286,7 +286,7 @@ class TestMakeSfPivotNoArriba:
         cls.ref_sources = pd.DataFrame(
             {"Fusion": ["A--B"], "ReferenceSources": ["ChimerKDB"]}
         )
-        cls.pivot_config = {
+        cls.summary_config = {
             "index": ["SPECIMEN", "LEFTRIGHT"],
             "columns": None,
             "values": [
@@ -301,17 +301,17 @@ class TestMakeSfPivotNoArriba:
                 "FFPM",
             ],
         }
-        cls.result = parser.make_sf_pivot(
+        cls.result = parser.make_sf_summary(
             cls.sf_df,
             cls.sf_runs_df,
             cls.fastqc_pivot_df,
             cls.arriba_df,
             cls.prev_pos,
             cls.ref_sources,
-            cls.pivot_config,
+            cls.summary_config,
         )
 
-    def test_pivot_does_not_raise(self):
+    def test_summary_does_not_raise(self):
         assert not self.result.empty
 
     def test_frame_column_absent(self):
@@ -319,3 +319,102 @@ class TestMakeSfPivotNoArriba:
 
     def test_ffpm_column_present(self):
         assert "FFPM" in self.result.columns
+
+
+class TestMakeArribaSummary:
+    """Unit tests for final Arriba summary table from multiple data sources."""
+
+    @classmethod
+    def setup_class(cls):
+        """Initialize shared test data for all test cases."""
+        cls.arriba_df = pd.DataFrame(
+            {
+                "file_name": ["123-2XX-ABC"],
+                "breakpoint1": ["chr1:123"],
+                "strand1(gene/fusion)": ["+/+"],
+                "breakpoint2": ["chr2:456"],
+                "strand2(gene/fusion)": ["+/+"],
+                "#gene1": ["A"],
+                "gene2": ["B"],
+                "split_reads1": [10],
+                "split_reads2": [5],
+                "discordant_mates": [2],
+                "reading_frame": ["in-frame"],
+                "confidence": ["high"],
+            }
+        )
+
+        cls.fastqc_pivot_df = pd.DataFrame(
+            {
+                "SPECIMEN": ["2XX"],
+                "Unique Reads(M)": [1.5],
+                "Duplicate Reads(M)": [2.5],
+            }
+        )
+
+        cls.prev_pos = pd.DataFrame(
+            {
+                "Specimen Identifier": ["SP1"],
+                "#FusionName": [["A--B"]],
+            }
+        )
+
+        cls.ref_sources = pd.DataFrame(
+            {
+                "Fusion": ["A--B"],
+                "ReferenceSources": ["ChimerKDB"],
+            }
+        )
+
+        cls.summary_config = {
+            "index": ["SPECIMEN", "LEFTRIGHT"],
+            "columns": None,
+            "values": [
+                "breakpoint1",
+                "#gene1",
+                "gene2",
+                "breakpoint2",
+                "split_reads1",
+                "split_reads2",
+                "discordant_mates",
+                "ReferenceSources",
+                "PreviousPositives",
+                "reading_frame",
+                "confidence",
+            ],
+        }
+
+        cls.result = parser.make_arriba_summary(
+            cls.arriba_df,
+            cls.fastqc_pivot_df,
+            cls.prev_pos,
+            cls.ref_sources,
+            cls.summary_config,
+        )
+
+    def test_summary_is_not_empty(self):
+        assert not self.result.empty, "Summary result is empty"
+
+    def test_summary_has_correct_index(self):
+        assert isinstance(self.result.index, pd.MultiIndex), "Index is not MultiIndex"
+        assert (
+            list(self.result.index.names) == self.summary_config["index"]
+        ), "Index names mismatch"
+
+    def test_summary_has_all_expected_columns(self):
+        for col in self.summary_config["values"]:
+            assert col in self.result.columns, f"Missing column: {col}"
+
+    def test_summary_shape_is_expected(self):
+        assert self.result.shape == (
+            1,
+            len(self.summary_config["values"]),
+        ), f"Unexpected shape: {self.result.shape}"
+
+    def test_summary_contains_correct_values(self):
+        row = self.result.iloc[0]
+        assert row["#gene1"] == "A"
+        assert row["gene2"] == "B"
+        assert row["reading_frame"] == "in-frame"
+        assert row["ReferenceSources"] == "ChimerKDB"
+        assert row["PreviousPositives"] == "SP1"

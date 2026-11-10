@@ -20,10 +20,11 @@ from utils.defaults import (
     FASTQC_SHEET_CONFIG,
     FI_SHEET_CONFIG,
     ARRIBA_SHEET_CONFIG,
+    ARRIBA_SUMMARY_CONFIG,
     SF_PREVIOUS_RUNS_SHEET_CONFIG,
     SF_SHEET_CONFIG,
     FASTQC_PIVOT_CONFIG,
-    SF_PIVOT_CONFIG,
+    SF_SUMMARY_CONFIG,
     PREV_POS_SHEET_CONFIG,
     REF_SOURCES_SHEET_CONFIG,
 )
@@ -34,7 +35,8 @@ from utils.parser import (
     parse_star_fusion,
     parse_arriba,
     make_fastqc_pivot,
-    make_sf_pivot,
+    make_sf_summary,
+    make_arriba_summary,
     parse_sf_previous,
     parse_prev_pos,
 )
@@ -138,19 +140,27 @@ def main(
 
         # Add Arriba data
         write_df_to_sheet(writer, df_arriba, **ARRIBA_SHEET_CONFIG)
+        arriba_summary = make_arriba_summary(
+            df_arriba,
+            fastqc_pivot,
+            df_prev_pos,
+            df_ref_sources,
+            ARRIBA_SUMMARY_CONFIG,
+        )
+        write_summary(writer, arriba_summary, ARRIBA_SUMMARY_CONFIG)
 
         # Add STAR-Fusion data
         write_df_to_sheet(writer, df_starfusion, **SF_SHEET_CONFIG)
-        sf_pivot = make_sf_pivot(
+        sf_summary = make_sf_summary(
             df_starfusion,
             df_sf_previous,
             fastqc_pivot,
             df_arriba,
             df_prev_pos,
             df_ref_sources,
-            SF_PIVOT_CONFIG,
+            SF_SUMMARY_CONFIG,
         )
-        write_summary(writer, sf_pivot, SF_PIVOT_CONFIG)
+        write_summary(writer, sf_summary, SF_SUMMARY_CONFIG)
         format_workbook(writer)
 
     fusion_workbook = dxpy.upload_local_file(outfile)

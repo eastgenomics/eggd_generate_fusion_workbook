@@ -43,6 +43,9 @@ def add_databar_to_ffpm(
     -------
     None
     """
+    if ffpm_col not in df.columns:
+        return
+    
     # Get col letter for FFPM
     col_letter = get_col_letter(worksheet, ffpm_col)
 
@@ -139,7 +142,9 @@ def format_summary_sheet(
     col_colors: dict,
     ffpm_col: str = "FFPM",
     index_col: str = "SPECIMEN",
+    stop_col: str = "FFPM",
 ) -> None:
+
     """
     Conditionally formats summary sheet rows per specimen.
 
@@ -155,6 +160,9 @@ def format_summary_sheet(
         Name of the FFPM column in the DataFrame, default is "FFPM"
     index_col : str, optional
         Name of the column to use for grouping ffpm, default is "SPECIMEN"
+    stop_col : str, optional
+        Name of the column where specimen-block coloring should stop,
+        default is "FFPM"
 
     Returns
     -------
@@ -167,7 +175,7 @@ def format_summary_sheet(
 
     style_borders(worksheet)
     add_databar_to_ffpm(worksheet, df, ffpm_col, index_col)
-    alternate_specimen_colors(worksheet, df, index_col)
+    alternate_specimen_colors(worksheet, df, index_col, stop_col=stop_col)
     highlight_specimen_borders(worksheet, df, index_col)
     rotate_headers(worksheet)
 
@@ -230,4 +238,7 @@ def write_summary(
             prompt=prompt,
             title=title,
         )
-    format_summary_sheet(summary_sheet, data, col_widths, col_colors)
+    stop_col = config.get("stop_col", "FFPM")
+    format_summary_sheet(
+        summary_sheet, data, col_widths, col_colors, stop_col=stop_col
+    )

@@ -303,17 +303,139 @@ def parse_prev_pos(dxfile: DXDataObject) -> pd.DataFrame:
 
     return df
 
+def add_arriba_leftright(arriba_df: pd.DataFrame) -> pd.DataFrame:
+    """Builds the LEFTRIGHT breakpoint+strand key for Arriba data
 
-def make_sf_pivot(
+    Parameters
+    ----------
+    arriba_df : pd.DataFrame
+        Arriba data containing breakpoint1, breakpoint2,
+        strand1(gene/fusion), strand2(gene/fusion) columns
+
+    Returns
+    -------
+    pd.DataFrame
+        Same dataframe with a new LEFTRIGHT column added
+    """
+    arriba_df["LEFTRIGHT"] = (
+        arriba_df["breakpoint1"]
+        + ":"
+        + arriba_df["strand1(gene/fusion)"].str.split("/").str[1]
+        + "_"
+        + arriba_df["breakpoint2"]
+        + ":"
+        + arriba_df["strand2(gene/fusion)"].str.split("/").str[1]
+    )
+    return arriba_df
+
+
+def make_arriba_summary(
+    arriba_df: pd.DataFrame,
+    fastqc_pivot_df: pd.DataFrame,
+    prev_pos: pd.DataFrame,
+    ref_sources: pd.DataFrame,
+    summary_config: dict,
+) -> pd.DataFrame:
+    """Generates Arriba summary table with merged data
+
+    Parameters
+    ----------
+    arriba_df : pd.DataFrame
+        Current Arriba data
+    fastqc_pivot_df : pd.DataFrame
+        FastQC summary data
+    prev_pos : pd.DataFrame
+        Previously reported Fusions
+    ref_sources : pd.DataFrame
+        Reference source of Fusions
+    summary_config : dict
+        Summary configuration parameters
+
+    Returns
+    -------
+    pd.DataFrame
+        Created summary table with merged data
+    """
+    df = arriba_df.copy()
+
+    if "file_name" in arriba_df.columns:
+        df["SPECIMEN"] = df["file_name"].apply(parse_specimen_id)
+        df["Filename"] = df["file_name"].apply(parse_igv_specimen_name)
+
+    df = add_arriba_leftright(df)
+
+    # Merge FastQC metrics
+    if not fastqc_pivot_df.empty:
+        df = df.merge(fastqc_pivot_df, on="SPECIMEN", how="left")
+
+    # Build gene-pair key for PreviousPositives/ReferenceSources matching
+    # (checking both gene orders, since Arriba's gene1/gene2 order may not
+    # match how these reference lists record the pair)
+    df["#FusionName"] = df["#gene1"] + "--" + df["gene2"]
+    df["#FusionName_rev"] = df["gene2"] + "--" + df["#gene1"]
+
+    # add prev positives
+    prev_pos = (
+        prev_pos[["Specimen Identifier", "#FusionName"]]
+        .rename(columns={"Specimen Identifier": "PreviousPositives"})
+        .explode("#FusionName", ignore_index=True)
+        .dropna(subset=["#FusionName"])
+    )
+    prev_pos_agg = (
+        prev_pos.groupby("#FusionName")["PreviousPositives"]
+        .apply(lambda x: ",".join(sorted(x)))
+        .reset_index()
+    )
+    df = df.merge(prev_pos_agg, on="#FusionName", how="left")
+    df = df.merge(
+        prev_pos_agg.rename(columns={"#FusionName": "#FusionName_rev"}),
+        on="#FusionName_rev",
+        how="left",
+        suffixes=("", "_rev"),
+    )
+    df["PreviousPositives"] = (
+        df["PreviousPositives"].fillna(df.get("PreviousPositives_rev"))
+    ).fillna("")
+
+    # add ref sources
+    df = df.merge(
+        ref_sources.rename(columns={"Fusion": "#FusionName"}),
+        on="#FusionName",
+        how="left",
+    )
+    df = df.merge(
+        ref_sources.rename(columns={"Fusion": "#FusionName_rev"}),
+        on="#FusionName_rev",
+        how="left",
+        suffixes=("", "_rev"),
+    )
+    df["ReferenceSources"] = (
+        df["ReferenceSources"].fillna(df.get("ReferenceSources_rev"))
+    ).fillna("")
+
+    # Build final summary table
+    df = df.sort_values(
+        by=["SPECIMEN", "LEFTRIGHT"], na_position="first"
+    ).reset_index(drop=True)
+    summary_df = (
+        df.groupby(summary_config["index"], dropna=False)[summary_config["values"]]
+        .first()
+        .sort_values(by=["SPECIMEN", "LEFTRIGHT"], na_position="first")
+    )
+
+    return summary_df
+
+
+def make_sf_summary(
     sf_df: pd.DataFrame,
     sf_runs_df: pd.DataFrame,
     fastqc_pivot_df: pd.DataFrame,
     arriba_df: pd.DataFrame,
     prev_pos: pd.DataFrame,
     ref_sources: pd.DataFrame,
-    pivot_config: dict,
+    summary_config: dict,
 ) -> pd.DataFrame:
-    """Generates STAR-Fusion pivot table with merged data
+    """Generates STAR-Fusion summary table with merged data
 
     Parameters
     ----------
@@ -329,13 +451,13 @@ def make_sf_pivot(
         Previously reported Fusions
     ref_sources : pd.DataFrame
         Reference source of Fusions
-    pivot_config : dict
-        Pivot configuration parameters
+    summary_config : dict
+        Summary configuration parameters
 
     Returns
     -------
     pd.DataFrame
-        Created Pivot table with merged data
+        Created summary table with merged data
     """
 
     df = sf_df.copy()
@@ -367,19 +489,10 @@ def make_sf_pivot(
 
     # Merge Arriba data
     if not arriba_df.empty:
-        arriba_df["LEFTRIGHT"] = (
-            arriba_df["breakpoint1"]
-            + ":"
-            + arriba_df["strand1(gene/fusion)"].str.split("/").str[1]
-            + "_"
-            + arriba_df["breakpoint2"]
-            + ":"
-            + arriba_df["strand2(gene/fusion)"].str.split("/").str[1]
-        )
+        arriba_df = add_arriba_leftright(arriba_df)
         df = df.merge(
             arriba_df[["LEFTRIGHT", "reading_frame"]], on="LEFTRIGHT", how="left"
         ).rename(columns={"reading_frame": "FRAME"})
-
 
     # add prev positives
     prev_pos = (
@@ -404,10 +517,10 @@ def make_sf_pivot(
     )
     df["ReferenceSources"] = df["ReferenceSources"].fillna("")
 
-    # Create final pivot table
+    # Build final summary table
     df = df.sort_values(by=["FFPM"], na_position="first").reset_index(drop=True)
-    pivot_df = (
-        df.groupby(pivot_config["index"], dropna=False)[pivot_config["values"]]
+    summary_df = (
+        df.groupby(summary_config["index"], dropna=False)[summary_config["values"]]
         .first()
         .sort_values(by=["SPECIMEN", "LEFTRIGHT"], na_position="first")
     )
@@ -422,10 +535,10 @@ def make_sf_pivot(
         "ReferenceSources",
         "PreviousPositives",
     ]
-    if "FRAME" in pivot_df.columns:
+    if "FRAME" in summary_df.columns:
         cols.append("FRAME")
     cols.append("FFPM")
 
-    pivot_df = pivot_df[cols]
+    summary_df = summary_df[cols]
 
-    return pivot_df
+    return summary_df
